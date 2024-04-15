@@ -1,10 +1,19 @@
-<script setup lang="ts">
+// pages/index.vue
 
+<script setup lang="ts">
+const {data: orders} = useFetch<{data: Record<string, {id:string}>}>('/orders');
+
+if (process.client) {
+  useQantra().toast.show({
+    title: "Hello World",
+    description: "This is a toast message"
+  });
+}
 </script>
 
 <template>
-  <div>
-    Hello, I'm the app.
+  <div v-for="order in orders?.data">
+    {{ order.id }}
   </div>
 </template>
 
