@@ -1,7 +1,15 @@
-import {PrismaClient} from "@prisma/client";
-// @ts-ignore
-global.prisma ??= (new PrismaClient());
-// @ts-ignore
-// const prisma: PrismaClient = global.prisma
-// Object.freeze(global.prisma)
-export default global.prisma as PrismaClient
+/**
+ * global singleton prisma instance implementation at TypeScript
+ * --------------------------------------------------------------
+ * import {PrismaClient} from "@prisma/client";
+ * declare global {var prisma: PrismaClient}
+ * global.prisma ??= (new PrismaClient());
+ * export default global.prisma as PrismaClient;
+ */
+
+/**
+ * exported from the ready global instance founded at:
+ * const prisma: typeof import('../../youcan/server/utils/database')['prisma']
+ *
+ */
+export default prisma;

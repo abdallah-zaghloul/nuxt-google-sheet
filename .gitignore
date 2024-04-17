@@ -27,3 +27,4 @@ logs
 *.sqlite-journal
 
 pnpm-lock.yaml
+prisma/client

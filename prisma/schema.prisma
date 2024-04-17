@@ -3,11 +3,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  // output   = env("PRISMA_CLIENT_OUTPUT")
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:dev.sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
