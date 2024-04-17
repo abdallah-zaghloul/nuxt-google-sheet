@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@prisma/client": "5.12.1",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
     "@youcan/qantra": "latest",
     "@youcan/ui-core": "2.5.9-beta.1",
     "@youcan/ui-icons": "2.5.9-beta.1",

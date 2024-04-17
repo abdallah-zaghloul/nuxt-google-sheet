@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Setting from "~/components/setting.vue";
-import GetStarted from "../components/get-started.vue";
+import LearnConnect from "../components/learn-connect.vue";
 
 const {data: setting} = useFetch<typeof prisma.setting| null>('/setting', {method: 'GET'});
 
@@ -9,8 +9,6 @@ const {data: setting} = useFetch<typeof prisma.setting| null>('/setting', {metho
 <template>
   <div id="main-container" class="container">
     <learn-connect v-if="!setting"/>
-    <about-features v-if="!setting"/>
-    <get-started v-if="!setting"/>
     <setting :setting="setting"/>
   </div>
 </template>

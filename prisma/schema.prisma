@@ -18,3 +18,13 @@ model Session {
   expires     DateTime?
   accessToken String?
 }
+
+model Setting {
+  id           String   @id @default(uuid())
+  storeId      String   @unique
+  clientId     String
+  clientSecret String
+  isConnected  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
