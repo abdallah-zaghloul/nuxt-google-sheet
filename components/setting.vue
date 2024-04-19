@@ -1,7 +1,7 @@
 <script lang="ts">
 import {Input, PrimaryButton} from '@youcan/ui-vue3'
 import useVuelidate from "@vuelidate/core"
-import {required, maxLength} from "@vuelidate/validators"
+import {required, maxLength, helpers} from "@vuelidate/validators"
 import {ref, computed} from "@vue/reactivity"
 import {toRefs} from "@vue/reactivity";
 import {toast} from "@youcan/qantra";
@@ -19,8 +19,16 @@ export default {
   setup(props) {
     const {setting, storeId} = toRefs(props)
     const rules = computed(() => ({
-      clientId: {required, maxLength: maxLength(191)},
-      clientSecret: {required, maxLength: maxLength(191)},
+      clientId: {
+        required,
+        maxLength: maxLength(191),
+        isClientId: helpers.withMessage('invalid client id format', helpers.regex(/^\d{12}-[a-zA-Z0-9_]+\.apps\.googleusercontent\.com$/))
+      },
+      clientSecret: {
+        required,
+        maxLength: maxLength(191),
+        isClientSecret: helpers.withMessage('invalid client secret format', helpers.regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/))
+      },
     }))
     const v$ = useVuelidate(rules, setting)
 
