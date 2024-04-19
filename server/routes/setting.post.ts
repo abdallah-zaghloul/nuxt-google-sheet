@@ -1,12 +1,16 @@
 import prisma from '~/prisma/singleton'
-import useVuelidate from "@vuelidate/core";
-import {required} from "@vuelidate/validators";
 
 export default defineEventHandler(async (event) => {
-    const session = event.context.session;
-    return await prisma.setting.create({
-        data: {
-
-        }
+    const reqBody: typeof prisma.setting = await readBody(event)
+    if (! reqBody.isConnected){
+        //connect google client
+    }
+    const setting = await prisma.setting.upsert({
+        where: {
+            storeId: reqBody.storeId
+        },
+        update: reqBody,
+        create: reqBody
     })
+    return setting
 });

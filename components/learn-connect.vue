@@ -75,12 +75,12 @@
                 <div class="form-group"><label class="form-label">Google App Client ID</label> <input type="text"
                                                                                                       name="google_app_settings[client_id]"
                                                                                                       placeholder="Client ID"
-                                                                                                      value="886928372155-o6v47q96b8n45bhegntj0p5rptgvl5u8.apps.googleusercontent.com">
+                                                                                                     >
                 </div>
                 <div class="form-group"><label class="form-label">Google App Secret key</label> <input type="text"
                                                                                                        name="google_app_settings[client_secret]"
                                                                                                        placeholder="Client Secret Key"
-                                                                                                       value="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">
+                                                                                                       >
                 </div>
               </div>
             </div>

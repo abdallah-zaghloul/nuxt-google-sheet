@@ -1,57 +1,104 @@
-<script setup lang="ts">
-import {Input, PrimaryButton} from '@youcan/ui-vue3';
-import useVuelidate from "@vuelidate/core";
-import {required, maxLength} from "@vuelidate/validators";
-import {ref} from "@vue/reactivity";
+<script lang="ts">
+import {Input, PrimaryButton} from '@youcan/ui-vue3'
+import useVuelidate from "@vuelidate/core"
+import {required, maxLength} from "@vuelidate/validators"
+import {ref, computed} from "@vue/reactivity"
+import {toRefs} from "@vue/reactivity";
+import {toast} from "@youcan/qantra";
 
-defineProps({
-  setting: {
-    type: Object,
-    default: null
-  }
-})
-
-const formData = ref({
-      clientId: '',
-      clientSecret: '',
-      // isConnected: '',
-    }),
-    rules = {
-      clientId: {required},
-      clientSecret: {required},
-      // isConnected: {required},
+export default {
+  props: {
+    storeId: {
+      type: String
     },
-    v$ = useVuelidate(rules, formData),
-    submitForm = async () => {
-      const passed = await v$.value.$validate()
-      if (passed)
-        alert('success')
-      else
-        alert('failed')
-    };
+    setting: {
+      type: Object,
+      default: null
+    }
+  },
+  setup(props) {
+    const {setting, storeId} = toRefs(props)
+    const rules = computed(() => ({
+      clientId: {required, maxLength: maxLength(191)},
+      clientSecret: {required, maxLength: maxLength(191)},
+    }))
+    const v$ = useVuelidate(rules, setting)
 
+    return {
+      setting,
+      storeId,
+      v$
+    }
+  },
+  methods: {
+    async submitForm() {
+      await this.v$.$validate()
+      if (!this.v$.$error)
+        await this.createRecord()
+    },
+    async createRecord() {
+      await $fetch('/setting', {
+        method: "POST",
+        body: {
+          clientId: this.setting.clientId,
+          clientSecret: this.setting.clientSecret,
+          storeId: this.storeId,
+          isConnected: this.setting.isConnected,
+        },
+      }).then((record) => {
+        ({
+          storeId: this.storeId,
+          clientId: this.setting.clientId,
+          clientSecret: this.setting.clientSecret,
+          isConnected: this.setting.isConnected
+        } = record)
 
+        /** alert success
+         toast.show({
+         title: "Stored Successfully",
+         description: "Your Google Client Setting stored successfully"
+         });
+         */
+      })
+    },
+
+  }
+}
 </script>
 
 <template>
   <div v-if="setting">
+    <form action="/setting" method="post" @submit.prevent="submitForm">
 
-    <label>Google Client ID</label>
-    <Input id="clientId" :model-value="setting.clientId" :placeholder="'Google Client ID'"/>
+      <label>Google Client ID</label>
+      <Input id="clientId" v-model="setting.clientId" :placeholder="'Google Client ID'"/>
+      <small v-if="v$.clientId.$error">{{ v$.clientId.$errors[0].$message }}</small>
 
-    <label>Google Client Secret</label>
-    <Input id="clientSecret" :model-value="setting.clientSecret" :placeholder="'Google Client Secret'"/>
+      <label>Google Client Secret</label>
+      <Input id="clientSecret" v-model="setting.clientSecret" :placeholder="'Google Client Secret'"/>
+      <small v-if="v$.clientSecret.$error">{{ v$.clientSecret.$errors[0].$message }}</small>
 
-    <PrimaryButton v-if="!setting?.isConnected">
-      <i class="i-youcan:sign-out"></i>
-      Connect account
-    </PrimaryButton>
+
+      <PrimaryButton type="submit" v-if="!setting?.isConnected">Connect account</PrimaryButton>
+    </form>
 
   </div>
 </template>
 
 <style scoped>
 #clientId, #clientSecret {
-  margin: 10px;
+  display: block;
+  margin: 1%
 }
+
+label {
+  display: block;
+}
+
+small {
+  text-align: center;
+  color: red;
+  display: block;
+}
+
 </style>
