@@ -1,20 +1,14 @@
-<script lang="ts">
-export default {
-  data() {
-    const {data} = useFetch<any>('/setting', {method: 'GET'});
-    return {
-      data
-    }
-  }
-}
+<script setup lang="ts">
+const { data } = useFetch<any>('/setting', { method: 'GET' });
+
 </script>
 
 <template>
   <div id="main-container" class="container">
-    <learn-connect v-if="!data?.setting"/>
-    <about-features v-if="!data?.setting"/>
-    <get-started v-if="!data?.setting"/>
-    <setting :setting="data?.setting" :storeId="data?.storeId"/>
+    <LearnConnect v-if="!data?.setting" />
+    <AboutFeatures v-if="!data?.setting" />
+    <GetStarted v-if="!data?.setting" />
+    <Setting :setting="data?.setting" :storeId="data?.storeId" />
   </div>
 </template>
 
