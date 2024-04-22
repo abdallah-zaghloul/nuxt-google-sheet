@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { Input, PrimaryButton } from '@youcan/ui-vue3'
-import useVuelidate from "@vuelidate/core"
 import { required, maxLength, helpers } from "@vuelidate/validators"
-import { ref, computed } from "@vue/reactivity"
-import { toRefs } from "@vue/reactivity";
-// import { toast } from "@youcan/qantra";
+import { ref } from "@vue/reactivity"
+import useValidator from '~/composables/useValidator';
 
 const props = defineProps({
   storeId: {
@@ -16,26 +14,24 @@ const props = defineProps({
   }
 })
 
-const { setting, storeId } = toRefs(props)
-const rules = computed(() => ({
-  clientId: {
-    required,
-    maxLength: maxLength(191),
-    isClientId: helpers.withMessage('invalid client id format', helpers.regex(/^\d{12}-[a-zA-Z0-9_]+\.apps\.googleusercontent\.com$/))
+const setting = toRef(props, 'setting');
+const { v$, onSubmit, hasError, errorMessage } = useValidator({
+  rules: {
+    clientId: {
+      required,
+      maxLength: maxLength(191),
+      isClientId: helpers.withMessage('invalid client id format', helpers.regex(/^\d{12}-[a-zA-Z0-9_]+\.apps\.googleusercontent\.com$/))
+    },
+    clientSecret: {
+      required,
+      maxLength: maxLength(191),
+      isClientSecret: helpers.withMessage('invalid client secret format', helpers.regex(/^[A-Za-z0-9_-]{24,}$/))
+    },
   },
-  clientSecret: {
-    required,
-    maxLength: maxLength(191),
-    isClientSecret: helpers.withMessage('invalid client secret format', helpers.regex(/^[A-Za-z0-9_-]{24,}$/))
-  },
-}))
-const v$ = useVuelidate(rules, setting)
+  data: setting,
+  onPass: upsertRecord,
+})
 
-async function submitForm() {
-  await v$.value.$validate()
-  if (!v$.value.$error)
-    await upsertRecord()
-}
 
 async function upsertRecord() {
   await $fetch('/setting', {
@@ -43,23 +39,15 @@ async function upsertRecord() {
     body: {
       clientId: setting.value.clientId,
       clientSecret: setting.value.clientSecret,
-      storeId: storeId.value,
+      storeId: props.storeId,
       isConnected: setting.value.isConnected,
     },
   }).then((record) => {
     ({
-      storeId: storeId.value,
       clientId: setting.value.clientId,
       clientSecret: setting.value.clientSecret,
       isConnected: setting.value.isConnected
     } = record)
-
-    /** alert success
-     toast.show({
-     title: "Stored Successfully",
-     description: "Your Google Client Setting stored successfully"
-     });
-     */
   })
 }
 
@@ -67,15 +55,15 @@ async function upsertRecord() {
 
 <template>
   <div v-if="setting">
-    <form action="/setting" method="post" @submit.prevent="submitForm">
+    <form action="/setting" method="post" @submit.prevent="onSubmit">
 
       <label>Google Client ID</label>
       <Input id="clientId" v-model="setting.clientId" :placeholder="'Google Client ID'" />
-      <small v-if="v$.clientId.$error">{{ v$.clientId.$errors[0].$message }}</small>
+      <small v-if="hasError(v$, 'clientId')">{{ errorMessage(v$, 'clientId') }}</small>
 
       <label>Google Client Secret</label>
       <Input id="clientSecret" v-model="setting.clientSecret" :placeholder="'Google Client Secret'" />
-      <small v-if="v$.clientSecret.$error">{{ v$.clientSecret.$errors[0].$message }}</small>
+      <small v-if="hasError(v$, 'clientSecret')">{{ errorMessage(v$, 'clientSecret') }}</small>
 
 
       <PrimaryButton type="submit" v-if="!setting?.isConnected">Connect account</PrimaryButton>
