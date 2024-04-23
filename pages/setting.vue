@@ -1,13 +1,13 @@
 <script setup lang="ts">
 
-const {data: setting} = useFetch<typeof prisma.setting| null>('/setting', {method: 'GET'});
+const setting = useSetting()
 
 </script>
 
 <template>
   <div id="main-container" class="container">
-    <LearnConnect v-if="!setting"/>
-    <Setting :setting="setting"/>
+    <LearnConnect v-if="!setting" />
+    <Setting :setting="setting" />
   </div>
 </template>
 

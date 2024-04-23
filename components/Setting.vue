@@ -1,20 +1,10 @@
 <script setup lang="ts">
 import { Input, PrimaryButton } from '@youcan/ui-vue3'
 import { required, maxLength, helpers } from "@vuelidate/validators"
-import { ref } from "@vue/reactivity"
 import useValidator from '~/composables/useValidator';
+import { useSetting } from '~/composables/useStates';
 
-const props = defineProps({
-  storeId: {
-    type: String
-  },
-  setting: {
-    type: Object,
-    default: null
-  }
-})
-
-const setting = toRef(props, 'setting');
+const setting = useSetting();
 const { v$, onSubmit, hasError, errorMessage } = useValidator({
   rules: {
     clientId: {
@@ -29,28 +19,8 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
     },
   },
   data: setting,
-  onPass: upsertRecord,
+  onPass: () => useApi.setSetting(setting.value!),
 })
-
-
-async function upsertRecord() {
-  await $fetch('/setting', {
-    method: "POST",
-    body: {
-      clientId: setting.value.clientId,
-      clientSecret: setting.value.clientSecret,
-      storeId: props.storeId,
-      isConnected: setting.value.isConnected,
-    },
-  }).then((record) => {
-    ({
-      clientId: setting.value.clientId,
-      clientSecret: setting.value.clientSecret,
-      isConnected: setting.value.isConnected
-    } = record)
-  })
-}
-
 </script>
 
 <template>

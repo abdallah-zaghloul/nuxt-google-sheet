@@ -1,14 +1,16 @@
 <script setup lang="ts">
-const { data } = useFetch<any>('/setting', { method: 'GET' });
+
+const getSetting = await useApi.getSetting()
+const setting = useSetting(getSetting.value)
 
 </script>
 
 <template>
   <div id="main-container" class="container">
-    <LearnConnect v-if="!data?.setting" />
-    <AboutFeatures v-if="!data?.setting" />
-    <GetStarted v-if="!data?.setting" />
-    <Setting :setting="data?.setting" :storeId="data?.storeId" />
+    <LearnConnect v-if="!setting" />
+    <AboutFeatures v-if="!setting" />
+    <GetStarted v-if="!setting" />
+    <Setting />
   </div>
 </template>
 
