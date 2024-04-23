@@ -1,12 +1,8 @@
-import prisma from '~/prisma/singleton'
+import settingService from "../composables/settingService";
 
 export default defineEventHandler(async (event) => {
     const storeId = event.context.session?.storeId
-    const setting = await prisma.setting.findUnique({
-        where: {
-            storeId
-        }
-    }).catch((error: any) => null)
+    const setting = await settingService.get(storeId)
 
     return {
         storeId,
