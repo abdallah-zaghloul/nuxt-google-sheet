@@ -28,3 +28,5 @@ logs
 
 pnpm-lock.yaml
 prisma/client
+
+google-application-credentials.json
