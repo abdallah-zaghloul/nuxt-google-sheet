@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+useYoucanSession()
 const setting = useSetting()
 
 </script>

@@ -10,5 +10,10 @@ export default {
     //@ts-ignore
     create: setting,
     update: setting
-  })
+  }),
+
+  toggleConnect: (storeId: string, isConnected: boolean) => prisma.setting.update({
+    where: { storeId },
+    data: { isConnected }
+  }),
 }
