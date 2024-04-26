@@ -9,6 +9,9 @@
     "youcan": "youcan",
     "nuxt": "nuxt"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@types/jsonwebtoken": "^9.0.5",
@@ -18,7 +21,8 @@
     "h3": "^1.9.0",
     "nuxt": "^3.8.2",
     "prisma": "^5.12.1",
-    "ramda": "^0.29.1"
+    "ramda": "^0.29.1",
+    "tsx":"^4.7.3"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",
