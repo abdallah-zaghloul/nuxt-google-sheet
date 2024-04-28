@@ -16,7 +16,7 @@ CREATE TABLE `Setting` (
     `clientId` VARCHAR(191) NOT NULL,
     `clientSecret` VARCHAR(191) NOT NULL,
     `isConnected` BOOLEAN NOT NULL DEFAULT false,
-    `tokens` JSON NULL,
+    `tokens` JSON NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 

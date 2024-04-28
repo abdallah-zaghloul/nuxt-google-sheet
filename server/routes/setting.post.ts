@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     const setting = await settingService.set(reqBody.storeId, reqBody)
 
     if (!setting.isConnected) 
-        await sendRedirect(event, googleService.getAuthUrl(setting))
+        await sendRedirect(event, googleService.initClient(setting).getAuthUrl())
     
     return setting
 });

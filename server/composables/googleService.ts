@@ -1,23 +1,52 @@
-import { google } from "googleapis"
+import { google, Auth } from "googleapis"
 import { Setting } from "@prisma/client"
 
-const getOAuth2Client = (setting: Setting) => new google.auth.OAuth2({
-  clientId: setting.clientId,
-  clientSecret: setting.clientSecret,
-  redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
-})
+export default class googleService {
 
-const getAuthUrl = (setting: Setting) => getOAuth2Client(setting).generateAuthUrl({
-  access_type: 'offline',
-  prompt: 'consent',
-  state: setting.storeId,
-  scope: [
-    'https://www.googleapis.com/auth/userinfo.email', //user email info permission
-    'https://www.googleapis.com/auth/spreadsheets' //spreedsheet permission
-  ],
-})
+  private static instance?: googleService
+  private client: Auth.OAuth2Client
+  private setting: Setting
 
-export default {
-  getOAuth2Client,
-  getAuthUrl
+  //singleton
+  public static initClient(setting: Setting) {
+    return googleService.instance ??= (new googleService(setting))
+  }
+
+  //singleton private constructor
+  private constructor(setting: Setting) {
+    this.setting = setting
+    this.client = (new google.auth.OAuth2({
+      clientId: this.setting.clientId,
+      clientSecret: this.setting.clientSecret,
+      redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
+    }))
+  }
+
+  public getClient(): Auth.OAuth2Client {
+    return this.client
+  }
+
+
+  public getSetting(): Setting {
+    return this.setting
+  }
+
+  public getAuthUrl() {
+    return this.client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      state: this.setting.storeId,
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.email', //user email info permission
+        'https://www.googleapis.com/auth/spreadsheets' //spreedsheet permission
+      ]
+    })
+  }
+
+  public getTokensByCode(code: string): Promise<Auth.Credentials | null> {
+    return this.client.getToken(code).then(
+      onfulfilled => onfulfilled.tokens,
+      onrejected => null
+    )
+  }
 }
