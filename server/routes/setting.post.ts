@@ -9,6 +9,12 @@ const removeCORSAtRedirect = (event: H3Event) => {
     event.node.res.setHeader('Access-Control-Allow-Origin', '*')
     event.node.res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     event.node.res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+
+     appendHeaders(event, {
+            "access-control-max-age": "7200",
+            "access-control-allow-origin": "*",
+            "access-control-allow-headers": "Authorization, Content-Type",
+        });
 }
 */
 
@@ -16,8 +22,9 @@ export default defineEventHandler(async (event) => {
     const reqBody: Setting = await readBody(event)
     const setting = await settingService.set(reqBody.storeId, reqBody)
 
-    if (!setting.isConnected) 
+    if (!setting.isConnected) {
         await sendRedirect(event, googleService.initClient(setting).getAuthUrl())
-    
+    }
+
     return setting
 });
