@@ -25,7 +25,7 @@ model Setting {
   clientId     String
   clientSecret String
   isConnected  Boolean  @default(false)
-  tokens       Json?
+  credentials  Json?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }

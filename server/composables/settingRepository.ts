@@ -1,28 +1,36 @@
-import { Setting } from "@prisma/client";
+import { Prisma, Setting as PrismaSetting } from "@prisma/client";
+import { Setting } from "../types"
 
-const toggleConnectQuery = (storeId: string, isConnected: boolean, token?: string) => {
-  const tokens = token ? `JSON_ARRAY_APPEND(tokens, '$', ${token})` : `[]`
-  return prisma.$executeRaw`UPDATE Setting 
-         SET tokens = ${tokens},
-         isConnected = ${isConnected} 
-         WHERE storeId = ${storeId};`
-}
+const getter = (setting: PrismaSetting) => (setting as Setting)
+const setter = (setting: Setting) => ({
+  storeId: setting.storeId,
+  clientId: setting.clientId,
+  clientSecret: setting.clientSecret,
+  isConnected: setting.isConnected,
+  credentials: setting.credentials as Prisma.JsonObject,
+  createdAt: setting.createdAt,
+  updatedAt: setting.updatedAt,
+})
 
 export default {
-  get: (storeId: string) => prisma.setting.findUnique({
-    where: { storeId }
-  }).catch((error: any) => null),
+  get: (storeId: string) => {
+    return prisma.setting.findUnique({
+      where: { storeId }
+    }).then(
+      //@ts-ignore
+      setting => getter(setting),
+      notfound => null
+    )
+  },
 
-  set: (storeId: string, setting: Setting) => prisma.setting.upsert({
-    where: { storeId },
-    //@ts-ignore
-    create: setting,
-    update: setting
-  }),
-
-  toggleConnect: (storeId: string, isConnected: boolean, token?: string) => toggleConnectQuery(
-    storeId, isConnected, token
-  ).then(() => prisma.setting.findUnique({ where: { storeId } }))
-
-
+  set: (storeId: string, setting: Setting) => {
+    const data = setter(setting)
+    return prisma.setting.upsert({
+      where: { storeId },
+      create: data,
+      update: data
+    }).then(
+      setting => getter(setting),
+    )
+  },
 }

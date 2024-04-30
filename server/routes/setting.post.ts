@@ -1,22 +1,6 @@
-import { Setting } from "@prisma/client";
+import { Setting } from "../types";
 import settingService from "../composables/settingService";
 import googleService from "../composables/googleService";
-import { ServerResponse, IncomingMessage } from "http";
-import { H3Event } from "h3"
-
-/*
-const removeCORSAtRedirect = (event: H3Event) => {
-    event.node.res.setHeader('Access-Control-Allow-Origin', '*')
-    event.node.res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    event.node.res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-
-     appendHeaders(event, {
-            "access-control-max-age": "7200",
-            "access-control-allow-origin": "*",
-            "access-control-allow-headers": "Authorization, Content-Type",
-        });
-}
-*/
 
 export default defineEventHandler(async (event) => {
     const reqBody: Setting = await readBody(event)
@@ -25,6 +9,6 @@ export default defineEventHandler(async (event) => {
     if (!setting.isConnected) {
         await sendRedirect(event, googleService.initClient(setting).getAuthUrl())
     }
-
+    
     return setting
 });

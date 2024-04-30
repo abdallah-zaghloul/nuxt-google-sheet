@@ -1,8 +1,14 @@
-import { Setting } from "@prisma/client";
+import { Setting } from "../types";
 import settingRepository from "./settingRepository";
+import { Auth } from "googleapis";
+
 
 export default {
   get: (storeId: string) => settingRepository.get(storeId),
   set: (storeId: string, setting: Setting) => settingRepository.set(storeId, setting),
-  toggleConnect: (storeId: string, isConnected: boolean, token?: string) => settingRepository.toggleConnect(storeId, isConnected, token)
+  toggleConnect: (storeId: string, setting: Setting, isConnected: boolean, credentials?: Auth.Credentials) => {
+    setting.isConnected = isConnected
+    credentials && (setting.credentials = credentials)
+    return settingRepository.set(storeId, setting)
+  }
 }

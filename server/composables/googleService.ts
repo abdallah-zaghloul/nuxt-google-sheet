@@ -1,5 +1,5 @@
 import { google, Auth } from "googleapis"
-import { Setting } from "@prisma/client"
+import { Setting } from "../types"
 
 export default class googleService {
 
@@ -26,11 +26,6 @@ export default class googleService {
     return this.client
   }
 
-
-  public getSetting(): Setting {
-    return this.setting
-  }
-
   public getAuthUrl() {
     return this.client.generateAuthUrl({
       access_type: 'offline',
@@ -43,10 +38,15 @@ export default class googleService {
     })
   }
 
-  public getTokensByCode(code: string): Promise<Auth.Credentials | null> {
+  public authTokensByCode(code: string): Promise<Auth.Credentials | null> {
     return this.client.getToken(code).then(
-      onfulfilled => onfulfilled.tokens,
+      onfulfilled => this.setClientCredentials(onfulfilled.tokens),
       onrejected => null
     )
+  }
+
+  public setClientCredentials(credentials: Auth.Credentials) {
+    this.client.setCredentials(credentials)
+    return credentials
   }
 }
