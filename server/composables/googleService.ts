@@ -1,10 +1,10 @@
-import { google, Auth } from "googleapis"
-import { Setting } from "../types"
+import { google } from "googleapis"
+import { Client, Setting, Credentials } from "../types"
 
 export default class googleService {
 
   private static instance?: googleService
-  private client: Auth.OAuth2Client
+  private client: Client
   private setting: Setting
 
   //singleton
@@ -22,7 +22,7 @@ export default class googleService {
     }))
   }
 
-  public getClient(): Auth.OAuth2Client {
+  public getClient(): Client {
     return this.client
   }
 
@@ -38,14 +38,14 @@ export default class googleService {
     })
   }
 
-  public authTokensByCode(code: string): Promise<Auth.Credentials | null> {
+  public authTokensByCode(code: string): Promise<Credentials | null> {
     return this.client.getToken(code).then(
       onfulfilled => this.setClientCredentials(onfulfilled.tokens),
       onrejected => null
     )
   }
 
-  public setClientCredentials(credentials: Auth.Credentials) {
+  public setClientCredentials(credentials: Credentials) {
     this.client.setCredentials(credentials)
     return credentials
   }
