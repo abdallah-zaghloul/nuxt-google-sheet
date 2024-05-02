@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import "../assets/css/global.css"
 
 const getSetting = await useApi.getSetting()
 const setting = useSetting(getSetting.value)
@@ -7,16 +8,9 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <LearnConnect v-if="!setting" />
-    <AboutFeatures v-if="!setting" />
-    <GetStarted v-if="!setting" />
+    <LearnConnect/>
+    <!-- <AboutFeatures/> -->
+    <GetStarted />
     <Setting />
   </div>
 </template>
-
-<style>
-html {
-  background-color: white;
-  font: var(--text-sm-regular);
-}
-</style>
