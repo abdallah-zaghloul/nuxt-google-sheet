@@ -10,7 +10,6 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
     clientId: {
       required,
       maxLength: maxLength(191),
-      isClientId: helpers.withMessage('invalid client id format', helpers.regex(/^\d{12}-[a-zA-Z0-9_]+\.apps\.googleusercontent\.com$/))
     },
     clientSecret: {
       required,
