@@ -1,7 +1,7 @@
 {
     "name": "google-sheet",
-    "id": "dapp_2f6fYetk9zkyQgD5Dq6H2Glezsu",
-    "app_url": "http://localhost:3000/",
+    "id": "dapp_2fuGyt3WjlBt8W2WlXfgEr2HK0W",
+    "app_url": "http://localhost:3000",
     "redirect_urls": [
         "http://localhost:3000/auth/callback"
     ],
@@ -9,6 +9,6 @@
         "scopes": [
             "*"
         ],
-        "client_id": "113"
+        "client_id": "116"
     }
 }
