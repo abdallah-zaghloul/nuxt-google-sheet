@@ -36,3 +36,6 @@ OVERVIEW.pdf
 
 localhost-key.pem
 localhost.pem
+
+prisma/seed.ts
+youcan.app.json
