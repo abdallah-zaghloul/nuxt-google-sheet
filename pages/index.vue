@@ -21,3 +21,10 @@ const setting = useSetting(getSetting.value)
     </Card>
   </div>
 </template>
+
+<style scoped>
+.main-header {
+  font-weight: 600;
+  font-size: 16px;
+}
+</style>

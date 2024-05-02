@@ -64,8 +64,6 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
 </template>
 
 <style scoped>
-
-
 small {
   text-align: center;
   color: var(--red-500);
