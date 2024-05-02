@@ -5,6 +5,8 @@
   <div class="card">
     <div v-if="$slots.header" class="card-header">
       <slot name="header"/>
+      <slot name="header-accessory"/>
+
     </div>
     <div class="card-body">
       <slot />

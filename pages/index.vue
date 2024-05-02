@@ -8,9 +8,7 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <LearnConnect/>
-    <!-- <AboutFeatures/> -->
-    <GetStarted />
+    <SetupGuide />
     <Setting />
   </div>
 </template>
