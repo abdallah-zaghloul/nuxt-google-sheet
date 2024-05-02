@@ -8,7 +8,16 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <SetupGuide />
+    <Card>
+      <template #header>
+        <h2 class="main-header">
+          Google sheets
+        </h2>
+      </template>
+      <template #default>
+        <SetupGuide />
+      </template>
+    </Card>
     <Setting />
   </div>
 </template>
