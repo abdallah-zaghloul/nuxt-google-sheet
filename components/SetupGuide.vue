@@ -115,6 +115,11 @@ const VIDEO_URL = 'https://www.youtube.com/embed/bsRRVMXzMYA?si=HotQi0qlYkK-SDNg
 }
 
 .video-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
   font-size: 14px;
   color: var(--brand-500);
 }

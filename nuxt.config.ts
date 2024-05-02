@@ -2,4 +2,7 @@
 export default defineNuxtConfig({
   extends: ["./youcan"],
   devtools: { enabled: true },
+  modules: [
+    '@unocss/nuxt',
+  ],
 });
