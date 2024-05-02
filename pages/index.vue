@@ -16,8 +16,8 @@ const setting = useSetting(getSetting.value)
       </template>
       <template #default>
         <SetupGuide />
+        <Setting />
       </template>
     </Card>
-    <Setting />
   </div>
 </template>
