@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import "../assets/css/global.css"
 
 const getSetting = await useApi.getSetting()
 const setting = useSetting(getSetting.value)
@@ -7,16 +8,21 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <LearnConnect v-if="!setting" />
-    <AboutFeatures v-if="!setting" />
-    <GetStarted v-if="!setting" />
-    <Setting />
+    <Card>
+      <template #header>
+        <h2 class="main-header">
+          Google sheets
+        </h2>
+      </template>
+      <template #default>
+        <div v-if="!setting?.isConnected">
+          <SetupGuide />
+          <Setting />
+        </div>
+        <div v-else>
+          <Sheets />
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
-
-<style>
-html {
-  background-color: white;
-  font: var(--text-sm-regular);
-}
-</style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Input, PrimaryButton } from '@youcan/ui-vue3'
+import { Input, PrimaryButton, InputGroup } from '@youcan/ui-vue3'
 import { required, maxLength, helpers } from "@vuelidate/validators"
 import useValidator from '~/composables/useValidator';
 import { useSetting } from '~/composables/useStates';
@@ -23,38 +23,69 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
 </script>
 
 <template>
-  <div v-if="setting">
-    <form action="/setting" method="post" @submit.prevent="onSubmit">
-
-      <label>Google Client ID</label>
-      <Input id="clientId" v-model="setting.clientId" :placeholder="'Google Client ID'" />
-      <small v-if="hasError(v$, 'clientId')">{{ errorMessage(v$, 'clientId') }}</small>
-
-      <label>Google Client Secret</label>
-      <Input id="clientSecret" v-model="setting.clientSecret" :placeholder="'Google Client Secret'" />
-      <small v-if="hasError(v$, 'clientSecret')">{{ errorMessage(v$, 'clientSecret') }}</small>
-
-
-      <PrimaryButton type="submit" v-if="!setting?.isConnected">Connect account</PrimaryButton>
-    </form>
-
-  </div>
+  <Card class="inner-card">
+    <template #default>
+      <form class="content" action="/setting" method="post" @submit.prevent="onSubmit">
+        <InputGroup>
+          <template #label>
+            Google App Client ID
+          </template>
+          <template #input>
+          <Input id="clientId" v-model="setting.clientId" :placeholder="'Google Client ID'" />
+          </template>
+          <template v-if="hasError(v$, 'clientId')" #error>
+            <small>{{ errorMessage(v$, 'clientId') }}</small>
+          </template>
+        </InputGroup>
+        <InputGroup>
+          <template #label>
+            Google App Secret key
+          </template>
+          <template #input>
+            <Input id="clientSecret" v-model="setting.clientSecret" :placeholder="'Google Client Secret'" />
+          </template>
+          <template v-if="hasError(v$, 'clientSecret')" #error>
+            <small>{{ errorMessage(v$, 'clientSecret') }}</small>
+          </template>
+        </InputGroup>
+        <div class="footer">
+          <PrimaryButton type="submit">
+            Connect account
+          </PrimaryButton>
+        </div>
+      </form>
+    </template>
+  </Card>
 </template>
 
 <style scoped>
-#clientId,
-#clientSecret {
-  display: block;
-  margin: 1%
-}
-
-label {
-  display: block;
-}
-
 small {
   text-align: center;
-  color: red;
+  color: var(--red-500);
   display: block;
+}
+
+.inner-card {
+  margin-top: 20px;
+  background-color: var(--card-bg);
+  border-color: var(--card-border-color);
+  box-shadow: unset;
+}
+
+.inner-card .content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px
+}
+
+.inner-card .footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  grid-column: span 2;
+  padding-inline: 20px;
+  padding-block-start: 20px;
+  margin-inline: -20px;
+  border-block-start: 1px solid var(--gray-200);
 }
 </style>

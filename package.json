@@ -16,13 +16,14 @@
     "@nuxt/devtools": "latest",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/ramda": "^0.29.9",
+    "@unocss/nuxt": "^0.59.4",
     "@youcan/app": "latest",
     "@youcan/cli": "latest",
     "h3": "^1.9.0",
     "nuxt": "^3.8.2",
     "prisma": "^5.12.1",
     "ramda": "^0.29.1",
-    "tsx":"^4.7.3"
+    "tsx": "^4.7.3"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",
