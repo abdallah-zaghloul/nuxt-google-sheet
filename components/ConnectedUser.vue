@@ -30,20 +30,9 @@ import { SecondaryButton } from '@youcan/ui-vue3'
   color: var(--brand-500);
 }
 
-.container .disconnect {
-  border-color: var(--brand-500);
-}
-
 :deep(
-  .disconnect.base-button.secondary .text, 
   .disconnect.base-button.secondary .icon
 ) {
-  color: var(--brand-500);
-}
-
-:deep(
-  .disconnect.base-button.secondary:hover
-) {
-  background-color: var(--brand-500);
+  color: var(--gray-800);
 }
 </style>
