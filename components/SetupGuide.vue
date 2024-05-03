@@ -105,8 +105,8 @@ const VIDEO_URL = 'https://www.youtube.com/embed/bsRRVMXzMYA?si=HotQi0qlYkK-SDNg
 }
 
 .inner-card {
-  background-color: #fcfcfc;
-  border-color: #e5e5e5;
+  background-color: var(--card-bg);
+  border-color: var(--card-border-color);
   box-shadow: unset;
 }
 

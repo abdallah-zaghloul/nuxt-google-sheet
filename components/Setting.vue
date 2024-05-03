@@ -67,8 +67,8 @@ small {
 
 .inner-card {
   margin-top: 20px;
-  background-color: #fcfcfc;
-  border-color: #e5e5e5;
+  background-color: var(--card-bg);
+  border-color: var(--card-border-color);
   box-shadow: unset;
 }
 

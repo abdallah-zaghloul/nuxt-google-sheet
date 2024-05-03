@@ -16,6 +16,11 @@
   4. Improve text rendering
 */
 
+:root {
+  --card-bg: #fcfcfc;
+  --card-border-color: #e5e5e5;
+}
+
 html {
   font: var(--text-sm-regular);
 }
