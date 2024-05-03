@@ -17,12 +17,16 @@ const setting = {
     },
     sheets: [
         {
-            name: generateRandomName(),
-            fields: ['order_id'],
+            title: generateRandomName(),
+            headers: ['Order ID'],
+            googleId: generateRandomName(),
+            googleUrl: generateRandomName()
         },
         {
-            name: generateRandomName(),
-            fields: ['order_id', 'first name'],
+            title: generateRandomName(),
+            headers: ['Order ID', 'First name'],
+            googleId: generateRandomName(),
+            googleUrl: generateRandomName()
         }
     ]
 }

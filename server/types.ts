@@ -17,7 +17,7 @@ export type Setting = {
 
 export type { Session }
 
-export type Field = 'Order ID' & (
+export type Header = (
     | 'SKU'
     | 'Vendor'
     | 'Total tax'
@@ -55,16 +55,18 @@ export type Field = 'Order ID' & (
     | 'Total with customer currency'
 )
 
-export type Fields = Set<Field>;
+export type Headers = ["Order ID"] & Header[]
 
 export type Sheet = {
     id: string
     storeId: string
-    name: string,
-    fields: Fields
-    isActive: boolean
+    title: string,
+    headers: Headers
+    status: boolean
+    googleId: string
+    googleUrl: string
     createdAt: Date,
     updatedAt: Date,
 }
 
-export type SheetCreate = Pick<Sheet, 'storeId'|'name'|'fields'>
+export type GoogleSpreadSheet = Pick<Sheet, 'title' | 'headers' | 'googleId' | 'googleUrl'>
