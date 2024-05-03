@@ -49,13 +49,8 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
           </template>
         </InputGroup>
         <div class="footer">
-          <PrimaryButton type="submit" v-if="!setting?.isConnected">
-            <template #icon>
-              <i class="i-youcan:arrows-left-right"></i>
-            </template>
-            <template #default>
-              Connect account
-            </template>
+          <PrimaryButton type="submit">
+            Connect account
           </PrimaryButton>
         </div>
       </form>
