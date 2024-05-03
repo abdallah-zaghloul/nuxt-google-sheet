@@ -4,10 +4,6 @@ import "../assets/css/global.css"
 const getSetting = await useApi.getSetting()
 const setting = useSetting(getSetting.value)
 
-if (setting && setting.value?.isConnected) {
-  await navigateTo('/sheets')
-}
-
 </script>
 
 <template>
@@ -19,8 +15,13 @@ if (setting && setting.value?.isConnected) {
         </h2>
       </template>
       <template #default>
-        <SetupGuide />
-        <Setting />
+        <div v-if="!setting?.isConnected">
+          <SetupGuide />
+          <Setting />
+        </div>
+        <div v-else>
+          <Sheets />
+        </div>
       </template>
     </Card>
   </div>
