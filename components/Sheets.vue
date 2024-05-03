@@ -1,9 +1,18 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { PrimaryButton } from '@youcan/ui-vue3'
+</script>
 
 <template>
   <Card class="inner-card">
     <template #default>
-      Sheets table
+      All sheets
+    </template>
+    <template #headerAccessory>
+      <div class="actions">
+        <PrimaryButton>
+          wewe
+        </PrimaryButton>
+      </div>
     </template>
   </Card>
 </template>

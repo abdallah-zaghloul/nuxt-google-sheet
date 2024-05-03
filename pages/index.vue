@@ -25,7 +25,7 @@ const setting = useSetting(getSetting.value)
           Google sheets
         </h2>
       </template>
-      <template #header-accessory>
+      <template #headerAccessory>
         <ConnectedUser />
       </template>
       <template #default>
