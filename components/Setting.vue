@@ -50,6 +50,9 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
         </InputGroup>
         <div class="footer">
           <PrimaryButton type="submit">
+            <template #icon>
+              <i class="i-youcan:arrows-left-right"></i>
+            </template>
             Connect account
           </PrimaryButton>
         </div>
