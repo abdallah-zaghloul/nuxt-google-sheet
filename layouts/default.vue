@@ -14,9 +14,10 @@
 }
 
 html {
-    background-color: var(--gray-50);
-    padding: 20px;
-  }
+  background-color: var(--gray-50);
+  padding: 20px;
+}
+
 body {
   margin: 0;
   padding: 0;

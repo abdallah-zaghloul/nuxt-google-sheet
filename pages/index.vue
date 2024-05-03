@@ -4,6 +4,10 @@ import "../assets/css/global.css"
 const getSetting = await useApi.getSetting()
 const setting = useSetting(getSetting.value)
 
+if (setting && setting.value?.isConnected) {
+  await navigateTo('/sheets')
+}
+
 </script>
 
 <template>
@@ -21,10 +25,3 @@ const setting = useSetting(getSetting.value)
     </Card>
   </div>
 </template>
-
-<style scoped>
-.main-header {
-  font-weight: 600;
-  font-size: 16px;
-}
-</style>
