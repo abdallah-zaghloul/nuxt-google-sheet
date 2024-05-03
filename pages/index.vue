@@ -34,4 +34,3 @@ const setting = useSetting(getSetting.value)
     </Card>
   </div>
 </template>
- 
