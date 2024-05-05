@@ -22,7 +22,7 @@
     "nuxt": "^3.8.2",
     "prisma": "^5.12.1",
     "ramda": "^0.29.1",
-    "tsx":"^4.7.3"
+    "tsx": "^4.7.3"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",
@@ -34,6 +34,7 @@
     "@youcan/ui-vue3": "2.5.9-beta.1",
     "googleapis": "^134.0.0",
     "isbot": "^4.2.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.6"
   }
 }
