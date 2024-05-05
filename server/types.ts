@@ -17,6 +17,7 @@ export type Setting = {
 
 export type { Session }
 
+export type OrderId = "Order ID"
 export type Header = (
     | 'SKU'
     | 'Vendor'
@@ -55,7 +56,7 @@ export type Header = (
     | 'Total with customer currency'
 )
 
-export type Headers = ["Order ID"] & Header[]
+export type Headers = [OrderId] & Header[]
 
 export type Sheet = {
     id: string
