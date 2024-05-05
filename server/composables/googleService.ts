@@ -72,17 +72,18 @@ export default class googleService {
       requestBody: {
         properties: { title }
       }
-    }).then((spreadSheetRes) => this.spreadSheetService.values.update({
-      spreadsheetId: spreadSheetRes.data.spreadsheetId!,
-      range: this.getSheetRange(spreadSheetRes.data.sheets?.[0].properties?.title!, headers),
-      valueInputOption: this.valueInputOption,
-      requestBody: { values: [headers] }
-    }).then((): GoogleSpreadSheet => ({
-      title: title,
-      headers: headers,
-      googleId: spreadSheetRes.data.spreadsheetId!,
-      googleUrl: spreadSheetRes.data.spreadsheetUrl!
-    })),
+    }).then(
+      (spreadSheetRes) => this.spreadSheetService.values.update({
+        spreadsheetId: spreadSheetRes.data.spreadsheetId!,
+        range: this.getSheetRange(spreadSheetRes.data.sheets?.[0].properties?.title!, headers),
+        valueInputOption: this.valueInputOption,
+        requestBody: { values: [headers] }
+      }).then((): GoogleSpreadSheet => ({
+        title: title,
+        headers: headers,
+        googleId: spreadSheetRes.data.spreadsheetId!,
+        googleUrl: spreadSheetRes.data.spreadsheetUrl!
+      })),
     )
   }
 
