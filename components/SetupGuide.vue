@@ -9,7 +9,7 @@ const VIDEO_URL = 'https://www.youtube.com/embed/bsRRVMXzMYA?si=HotQi0qlYkK-SDNg
         Setup and configure your own Google application
       </h2>
     </template>
-    <template #header-accessory>
+    <template #headerAccessory>
       <a class="video-link" target="_blank" href="">
         <i class="i-youcan-open-link"></i> Video Guide
       </a>

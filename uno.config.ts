@@ -18,8 +18,7 @@ export default defineConfig({
     }),
   ],
   safelist: [
-    ...Object.keys(YouCanIcons.icons).map(
-      (key) => `i-${YouCanIcons.prefix}:${key}`
-    ),
+    ...Object.keys(YouCanIcons.icons).map(key => `i-${YouCanIcons.prefix}:${key}`),
+    ...Object.keys(YouCanIcons.icons).map(key => `i-${YouCanIcons.prefix}-${key}`),
   ],
 })
