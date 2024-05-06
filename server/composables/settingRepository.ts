@@ -8,6 +8,7 @@ const setter = (setting: Setting) => ({
   clientSecret: setting.clientSecret,
   isConnected: setting.isConnected,
   credentials: setting.credentials as Prisma.JsonObject,
+  email: setting.email,
   createdAt: setting.createdAt,
   updatedAt: setting.updatedAt,
 })

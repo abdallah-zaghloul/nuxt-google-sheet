@@ -11,6 +11,7 @@ export type Setting = {
     clientSecret: string
     isConnected: boolean
     credentials?: Credentials,
+    email?: string,
     createdAt: Date,
     updatedAt: Date,
 }
@@ -71,3 +72,10 @@ export type Sheet = {
 }
 
 export type GoogleSpreadSheet = Pick<Sheet, 'title' | 'headers' | 'googleId' | 'googleUrl'>
+
+export type UserProfileInfo = {
+    sub: string,
+    picture: string,
+    email: string,
+    email_verified: boolean
+}

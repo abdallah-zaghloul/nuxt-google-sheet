@@ -15,20 +15,6 @@ const setting = {
         "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImUxYjkzYzY0MDE0NGI4NGJkMDViZjI5NmQ2NzI2MmI2YmM2MWE0ODciLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI4ODY5MjgzNzIxNTUtbzZ2NDdxOTZiOG40NWJoZWdudGowcDVycHRndmw1dTguYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4ODY5MjgzNzIxNTUtbzZ2NDdxOTZiOG40NWJoZWdudGowcDVycHRndmw1dTguYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTcyNDQ4NzQ0MTI4NjM5NjgxOTUiLCJlbWFpbCI6IjNiZGFsbGFoemFnaGxvdWxAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiIzanBWdm5FTUEyREltRWRJU2R4ejJBIiwiaWF0IjoxNzE0NDYzOTA2LCJleHAiOjE3MTQ0Njc1MDZ9.LyrSMk9zGZvg9o3kNwX3Jasiq-F81H6AZIEVH2_IId-sgsRiJOqipPgbUm_aaldBFjfCBerFkg-ikwTIKC5IagrE3pLNOJ0TWSXDI7Abax4WsrXv3CJ1l3CnlxYnia9kdoO831nUcMHC2FZ0YD5yV0ZRwrPCCuOvh1c13YD9yqE-8P7m2fHlEvxZyjjdckf7eNb5NToi7gr9gvI4mr09KoTEU0mgWePd4Xog38OiI8-gE2jZOqhECuHsclHiCGBSRtu6KiIGCY7kLD7oom1iHZp7gxsJHa3Yz-YnOD6wT-LtDiLnoJNeJusfEep5JubqPzisbZUYYED8oUX-fMPCcA",
         "expiry_date": 1714467505674
     },
-    sheets: [
-        {
-            title: generateRandomName(),
-            headers: ['Order ID'],
-            googleId: generateRandomName(),
-            googleUrl: generateRandomName()
-        },
-        {
-            title: generateRandomName(),
-            headers: ['Order ID', 'First name'],
-            googleId: generateRandomName(),
-            googleUrl: generateRandomName()
-        }
-    ]
 }
 
 async function main() {
@@ -38,25 +24,13 @@ async function main() {
             storeId: setting.storeId,
             clientId: setting.clientId,
             clientSecret: setting.clientSecret,
-            credentials: setting.credentials,
-            sheets: {
-                createMany: {
-                    data: setting.sheets,
-                    skipDuplicates: true
-                }
-            }
+            // credentials: setting.credentials,
         },
         update: {
             storeId: setting.storeId,
             clientId: setting.clientId,
             clientSecret: setting.clientSecret,
-            credentials: setting.credentials,
-            sheets: {
-                createMany: {
-                    data: setting.sheets,
-                    skipDuplicates: true
-                }
-            }
+            // credentials: setting.credentials,
         }
     }).catch((error: any) => {
         console.log(error)
