@@ -2,9 +2,10 @@ import { SettingReq } from "../types";
 import settingService from "../composables/settingService";
 import googleService from "../composables/googleService";
 import { settingSchema } from "../schemas";
+import getStoreId from "../utils/getStoreId";
 
 export default defineEventHandler((event) => handler.async(event, async () => {
-    const storeId = event.context.session?.storeId
+    const storeId = getStoreId(event)
     const { clientId, clientSecret, isConnected }: SettingReq = await validator.reqBody(settingSchema, event)
 
     if (isConnected) {
