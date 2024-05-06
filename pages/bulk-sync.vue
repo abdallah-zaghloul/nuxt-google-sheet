@@ -72,7 +72,6 @@ function handleSubmit(e: Event) {
   padding-bottom: 16px;
 }
 
-
 .form-actions {
   display: flex;
   align-items: center;
