@@ -9,13 +9,18 @@ const sheets = [
 ];
 const sheetToSync = ref(null);
 const ordersToSync = ref('');
+
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  // TODO: Sync orders with selected Google Sheet
+}
 </script>
 
 <template>
   <div class="container">
     <BackNavButton to="/" label="Back to sheets"/>
     <Card>
-      <form>
+      <form @submit="handleSubmit">
         <div class="form-container">
           <InputGroup>
             <template #label>
