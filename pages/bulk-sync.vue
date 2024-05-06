@@ -37,7 +37,7 @@ const ordersToSync = ref('');
             <template #input>
               <TextArea
                 v-model="ordersToSync"
-                placeholder="AB123"
+                placeholder="AB123 &#10;KJ872"
               />
             </template>
           </InputGroup>
