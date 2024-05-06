@@ -3,9 +3,13 @@
 
 <template>
   <div class="card">
-    <div v-if="$slots.header" class="card-header">
-      <slot name="header"/>
-      <slot name="header-accessory"/>
+    <div v-if="$slots.header || $slots.headerAccessory" class="card-header">
+      <div class="header">
+        <slot name="header"/>
+      </div>
+      <div class="accessory">
+        <slot name="headerAccessory"/>
+      </div>
 
     </div>
     <div class="card-body">
