@@ -1,13 +1,17 @@
 import googleService from "../composables/googleService"
 import settingService from "../composables/settingService"
-import sheetRepository from "../composables/sheetRepository"
-import { SheetCreate } from "../types"
+import { sheetCreateSchema } from "../schemas"
+import validator from "../utils/validator"
+import { GoogleSpreadSheet } from "../types"
+import sheetService from "../composables/sheetService"
+import handler from "../utils/handler"
 
-export default defineEventHandler(async (event) => {
-  const sheet: SheetCreate = await readBody(event)
-  const setting = await settingService.get(sheet.storeId)
-  await sheetRepository.create(sheet)
-  const createdGoogleSheet = await googleService.initClient(setting!).createSheet("test")
-  console.log(createdGoogleSheet)
-  return createdGoogleSheet
-})
+export default defineEventHandler((event) => handler.async(event, async () => {
+  const reqBody = await validator.reqBody(sheetCreateSchema, event)
+  const storeId = event.context.session?.storeId 
+  ?? (await readBody(event)).storeId // for debug
+
+  const setting = await settingService.get(storeId)
+  const googleSpreadSheet: GoogleSpreadSheet = await googleService.initClient(setting!).createSpreadSheet(reqBody.title, reqBody.headers)
+  return sheetService.create(storeId, googleSpreadSheet)
+}))

@@ -1,13 +1,16 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials } from "../types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers } from "../types"
 
 export default class googleService {
 
   private static instance?: googleService
   private client: Client
   private setting: Setting
-  private sheetService: sheets_v4.Resource$Spreadsheets
+  private spreadSheetService: sheets_v4.Resource$Spreadsheets
   private scope: string[]
+  private accessType: string
+  private prompt: string
+  private valueInputOption: string
 
   //singleton
   public static initClient(setting: Setting) {
@@ -16,20 +19,27 @@ export default class googleService {
 
   //singleton private constructor
   private constructor(setting: Setting) {
-    this.setting = setting
+    //google static options
+    this.accessType = 'offline'
+    this.prompt = 'consent'
+    this.valueInputOption = 'USER_ENTERED'
     this.scope = [
       'https://www.googleapis.com/auth/userinfo.email', //user email info permission
       'https://www.googleapis.com/auth/spreadsheets' //spreedsheet permission
     ]
 
+    // setting & OAuth2Client
+    this.setting = setting
     this.client = (new google.auth.OAuth2({
       clientId: this.setting.clientId,
       clientSecret: this.setting.clientSecret,
       redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
     }))
-
+    // set Client Credentials from setting
     this.setting.credentials && this.setClientCredentials(this.setting.credentials)
-    this.sheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
+
+    //init google sheet service for auth client
+    this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
   }
 
   public getClient(): Client {
@@ -38,8 +48,8 @@ export default class googleService {
 
   public getAuthUrl() {
     return this.client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'consent',
+      access_type: this.accessType,
+      prompt: this.prompt,
       state: this.setting.storeId,
       scope: this.scope
     })
@@ -57,8 +67,30 @@ export default class googleService {
     return credentials
   }
 
-  public createSheet() {
-    const sheet = this.sheetService.create()
-    return sheet
+  public createSpreadSheet(title: string, headers: Headers) {
+    return this.spreadSheetService.create({
+      requestBody: {
+        properties: { title }
+      }
+    }).then(
+      (spreadSheetRes) => this.spreadSheetService.values.update({
+        spreadsheetId: spreadSheetRes.data.spreadsheetId!,
+        range: this.getSheetRange(spreadSheetRes.data.sheets?.[0].properties?.title!, headers),
+        valueInputOption: this.valueInputOption,
+        requestBody: { values: [headers] }
+      }).then((): GoogleSpreadSheet => ({
+        title: title,
+        headers: headers,
+        googleId: spreadSheetRes.data.spreadsheetId!,
+        googleUrl: spreadSheetRes.data.spreadsheetUrl!
+      })),
+    )
+  }
+
+  public getSheetRange(sheetTitle: string, headers: Headers) {
+    const unicodeOfFirstCellChar_A = 65
+    const orderOfLastCellChar = headers.length - 1
+    const lastCellCharByUnicode = String.fromCharCode(unicodeOfFirstCellChar_A + orderOfLastCellChar)
+    return `${sheetTitle}!A1:${lastCellCharByUnicode}1`
   }
 }
