@@ -24,5 +24,8 @@ const setting = useSetting(getSetting.value)
         </div>
       </template>
     </Card>
+    <NuxtLink to="/sheet/13">
+      Single page
+    </NuxtLink>
   </div>
 </template>
