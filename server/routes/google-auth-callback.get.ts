@@ -8,18 +8,17 @@ export default defineEventHandler((event) => handler.async(event, async () => {
   const googleClientService = googleService.initClient(setting!)
   const credentials = await googleClientService.authTokensByCode(code!)
   const email = await googleClientService.getEmail()
-  await settingService.toggleConnect(storeId!, setting!, true, credentials!, email!)
+  await settingService.connect(storeId!, setting!, credentials!, email!)
   return sendRedirect(event, process.env.YOUCAN_AUTH_CALLBACK_URL!)
 },
   //catcher cancel connect to google
   async () => {
     const { state: storeId }: { state?: string } = getQuery(event)
-    
+
     if (!storeId)
       return handler.globalError(event)
 
-    const setting = await settingService.get(storeId!)
-    await settingService.toggleConnect(storeId!, setting!, false)
+    await settingService.disconnect(storeId!)
     return handler.globalError(event)
   }
 ))

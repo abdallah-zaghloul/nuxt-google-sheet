@@ -51,6 +51,13 @@ const headersSchema = z.array(
     message: `headers should be unique`
 })
 
+
+export const settingSchema = z.object({
+    clientId: z.string().min(1).max(191),
+    clientSecret: z.string().min(1).max(191),
+    isConnected: z.boolean()
+})
+
 export const sheetCreateSchema = z.object({
     title: z.string().min(1).max(191),
     headers: headersSchema,

@@ -1,16 +1,11 @@
 import { Prisma, Setting as PrismaSetting } from "@prisma/client";
-import { Setting } from "../types"
+import { Credentials, Setting, SettingReq } from "../types"
 
 const getter = (setting: PrismaSetting) => (setting as Setting)
-const setter = (setting: Setting) => ({
-  storeId: setting.storeId,
-  clientId: setting.clientId,
-  clientSecret: setting.clientSecret,
-  isConnected: setting.isConnected,
+const setter = (storeId: string, setting: Setting | SettingReq & { credentials?: Credentials | null }) => ({
+  ...setting,
   credentials: setting.credentials as Prisma.JsonObject,
-  email: setting.email,
-  createdAt: setting.createdAt,
-  updatedAt: setting.updatedAt,
+  storeId: storeId
 })
 
 export default {
@@ -24,8 +19,8 @@ export default {
     )
   },
 
-  set: (storeId: string, setting: Setting) => {
-    const data = setter(setting)
+  set: (storeId: string, setting: Setting | SettingReq & { credentials?: Credentials | null }) => {
+    const data = setter(storeId, setting)
     return prisma.setting.upsert({
       where: { storeId },
       create: data,
@@ -34,4 +29,15 @@ export default {
       setting => getter(setting),
     )
   },
+
+  update: (storeId: string, setting: Partial<Setting>) => {
+    setting.credentials && setting.credentials as Prisma.JsonObject
+    return prisma.setting.update({
+      where: { storeId },
+      //@ts-ignore
+      data: setting
+    }).then(
+      setting => getter(setting),
+    )
+  }
 }

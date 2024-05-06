@@ -9,12 +9,13 @@ export type Setting = {
     storeId: string
     clientId: string,
     clientSecret: string
-    isConnected: boolean
-    credentials?: Credentials,
+    isConnected?: boolean
+    credentials?: Credentials | null,
     email?: string,
     createdAt: Date,
     updatedAt: Date,
 }
+export type SettingReq = Pick<Setting, "clientId" | "clientSecret" | "isConnected">
 
 export type { Session }
 
