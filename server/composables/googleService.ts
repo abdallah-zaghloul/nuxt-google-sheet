@@ -1,16 +1,19 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers } from "../types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo } from "../types"
 
 export default class googleService {
 
   private static instance?: googleService
   private client: Client
   private setting: Setting
-  private spreadSheetService: sheets_v4.Resource$Spreadsheets
   private scope: string[]
   private accessType: string
   private prompt: string
   private valueInputOption: string
+  private userInfoUrl: string
+  //services
+  private spreadSheetService: sheets_v4.Resource$Spreadsheets
+
 
   //singleton
   public static initClient(setting: Setting) {
@@ -23,9 +26,11 @@ export default class googleService {
     this.accessType = 'offline'
     this.prompt = 'consent'
     this.valueInputOption = 'USER_ENTERED'
+    this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
     this.scope = [
       'https://www.googleapis.com/auth/userinfo.email', //user email info permission
-      'https://www.googleapis.com/auth/spreadsheets' //spreedsheet permission
+      'https://www.googleapis.com/auth/spreadsheets', //spreedsheet permission
+      // 'https://www.googleapis.com/auth/userinfo.profile' //user full profile info permission
     ]
 
     // setting & OAuth2Client
@@ -92,5 +97,18 @@ export default class googleService {
     const orderOfLastCellChar = headers.length - 1
     const lastCellCharByUnicode = String.fromCharCode(unicodeOfFirstCellChar_A + orderOfLastCellChar)
     return `${sheetTitle}!A1:${lastCellCharByUnicode}1`
+  }
+
+  public getProfile(): Promise<UserProfileInfo | null> {
+    return this.client.request({
+      url: this.userInfoUrl
+    }).then(
+      profile => profile.data as UserProfileInfo,
+      onrejected => null
+    )
+  }
+
+  public getEmail(): Promise<string | null> {
+    return this.getProfile().then(profile => profile?.email || null)
   }
 }

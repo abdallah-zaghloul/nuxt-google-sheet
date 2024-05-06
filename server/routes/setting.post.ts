@@ -1,14 +1,17 @@
-import { Setting } from "../types";
+import { SettingReq } from "../types";
 import settingService from "../composables/settingService";
 import googleService from "../composables/googleService";
+import { settingSchema } from "../schemas";
+import getStoreId from "../utils/getStoreId";
 
-export default defineEventHandler(async (event) => {
-    const reqBody: Setting = await readBody(event)
-    const setting = await settingService.set(reqBody.storeId, reqBody)
+export default defineEventHandler((event) => handler.async(event, async () => {
+    const storeId = getStoreId(event)
+    const { clientId, clientSecret, isConnected }: SettingReq = await validator.reqBody(settingSchema, event)
 
-    if (!setting.isConnected) {
+    if (isConnected) {
+        const setting = await settingService.set(storeId, { clientId, clientSecret })
         await sendRedirect(event, googleService.initClient(setting).getAuthUrl())
     }
-    
-    return setting
-});
+
+    return settingService.disconnect(storeId)
+}))

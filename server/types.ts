@@ -9,11 +9,13 @@ export type Setting = {
     storeId: string
     clientId: string,
     clientSecret: string
-    isConnected: boolean
-    credentials?: Credentials,
+    isConnected?: boolean
+    credentials?: Credentials | null,
+    email?: string,
     createdAt: Date,
     updatedAt: Date,
 }
+export type SettingReq = Pick<Setting, "clientId" | "clientSecret" | "isConnected">
 
 export type { Session }
 
@@ -71,3 +73,10 @@ export type Sheet = {
 }
 
 export type GoogleSpreadSheet = Pick<Sheet, 'title' | 'headers' | 'googleId' | 'googleUrl'>
+
+export type UserProfileInfo = {
+    sub: string,
+    picture: string,
+    email: string,
+    email_verified: boolean
+}

@@ -25,6 +25,7 @@ model Setting {
   clientId     String
   clientSecret String
   isConnected  Boolean  @default(false)
+  email        String? 
   credentials  Json?
   sheets       Sheet[]
   createdAt    DateTime @default(now())
