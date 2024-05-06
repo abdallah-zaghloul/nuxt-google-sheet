@@ -6,8 +6,10 @@ import { PrimaryButton, SecondaryButton } from '@youcan/ui-vue3'
   <Card class="inner-card">
     <template #headerAccessory>
       <div class="actions">
-        <SecondaryButton>
-          Bulk Sync orders
+        <SecondaryButton class="bulk-sinc">
+          <NuxtLink class="link" to="/bulk-sync">
+            Bulk-sync orders
+          </NuxtLink>
         </SecondaryButton>
         <PrimaryButton>
           <template #icon>
@@ -39,5 +41,15 @@ import { PrimaryButton, SecondaryButton } from '@youcan/ui-vue3'
 .inner-card .actions {
   display: flex;
   gap: 8px
+}
+
+:deep(.base-button.secondary.bulk-sinc) {
+  padding: 0;
+}
+
+.link {
+  text-decoration: none;
+  color: var(--base-black);
+  padding: 12px 16px;
 }
 </style>
