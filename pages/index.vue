@@ -8,20 +8,28 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <Card>
+    <Card v-if="!setting?.isConnected">
       <template #header>
         <h2 class="main-header">
           Google sheets
         </h2>
       </template>
       <template #default>
-        <div v-if="!setting?.isConnected">
-          <SetupGuide />
-          <Setting />
-        </div>
-        <div v-else>
-          <Sheets />
-        </div>
+        <SetupGuide />
+        <Setting />
+      </template>
+    </Card>
+    <Card v-else>
+      <template #header>
+        <h2 class="main-header">
+          Google sheets
+        </h2>
+      </template>
+      <template #headerAccessory>
+        <ConnectedUser />
+      </template>
+      <template #default>
+        <Sheets />
       </template>
     </Card>
   </div>
