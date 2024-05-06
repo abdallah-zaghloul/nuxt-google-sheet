@@ -22,6 +22,9 @@ const setting = useSetting(getSetting.value)
         <div v-else>
           <Sheets />
         </div>
+        <NuxtLink to="/bulk-sync">
+          Bulk Sync
+        </NuxtLink>
       </template>
     </Card>
   </div>

@@ -19,6 +19,7 @@
 :root {
   --card-bg: #fcfcfc;
   --card-border-color: #e5e5e5;
+  --card-shadow: #0000000d;
 }
 
 html {
