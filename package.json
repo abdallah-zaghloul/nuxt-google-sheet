@@ -35,6 +35,7 @@
     "@youcan/ui-vue3": "2.5.9-beta.1",
     "googleapis": "^134.0.0",
     "isbot": "^4.2.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "vuedraggable": "^4.1.0"
   }
 }
