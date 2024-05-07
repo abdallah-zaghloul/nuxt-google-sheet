@@ -54,6 +54,11 @@ const headersSchema = z.array(
 })
 
 
+export const paginationQuerySchema = z.object({
+    skip: z.coerce.number().min(0).optional(),
+    take: z.coerce.number().min(1).max(Number(process.env.PAGINATION_COUNT) ?? 1000)
+})
+
 export const settingSchema = z.object({
     clientId: z.string().min(1).max(191),
     clientSecret: z.string().min(1).max(191),
