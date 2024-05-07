@@ -80,3 +80,8 @@ export type UserProfileInfo = {
     email: string,
     email_verified: boolean
 }
+
+export type PaginationQuery = {
+    skip?: number,
+    take?: number
+}
