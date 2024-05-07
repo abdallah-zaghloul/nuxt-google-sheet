@@ -9,7 +9,7 @@ export default {
   }).then(
     (sheet: PrismaSheet) => getter(sheet)
   ),
-  
+
   paginate: (storeId: string, paginationQuery: PaginationQuery) => prisma.sheet.findMany({
     take: paginationQuery.take,
     skip: paginationQuery.skip,
@@ -17,6 +17,12 @@ export default {
     orderBy: {
       createdAt: 'desc'
     }
-  }).then(sheets => sheets.map(sheet => getter(sheet)))
+  }).then(sheets => sheets.map(sheet => getter(sheet))),
 
+  find: (storeId: string, id: string) => prisma.sheet.findUnique({
+    where: {
+      storeId,
+      id
+    }
+  })
 }
