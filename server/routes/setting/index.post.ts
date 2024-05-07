@@ -1,8 +1,8 @@
-import { SettingReq } from "../types";
-import settingService from "../composables/settingService";
-import googleService from "../composables/googleService";
-import { settingSchema } from "../schemas";
-import getStoreId from "../utils/getStoreId";
+import { SettingReq } from "../../types";
+import settingService from "../../composables/settingService";
+import googleService from "../../composables/googleService";
+import { settingSchema } from "../../schemas";
+import getStoreId from "../../utils/getStoreId";
 
 export default defineEventHandler((event) => handler.async(event, async () => {
     const storeId = getStoreId(event)
