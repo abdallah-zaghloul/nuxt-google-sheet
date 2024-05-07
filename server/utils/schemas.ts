@@ -53,6 +53,7 @@ const headersSchema = z.array(
     message: `headers should be unique`
 })
 
+export const uuidSchema = z.string().uuid()
 
 export const paginationQuerySchema = z.object({
     skip: z.coerce.number().min(0).optional(),

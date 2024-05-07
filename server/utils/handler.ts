@@ -42,6 +42,12 @@ export default {
     data: data
   }),
 
+  notFoundError:(event: H3Event) => sendAnError({
+    event: event,
+    statusCode: 404,
+    statusMessage: 'Not found'
+  }),
+
   sync: (event: H3Event, fn: Function, catcher?: Function) => {
     try {
       return sendResponse(fn())

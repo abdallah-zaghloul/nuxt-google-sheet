@@ -2,26 +2,14 @@ import { ZodTypeAny } from "zod"
 import { H3Event } from "h3"
 import handler from "./handler"
 
+const parse = (schema: ZodTypeAny, event: H3Event, data: any) => {
+  const res = schema.safeParse(data)
+  return res.success ? res.data : handler.validationError(event, res.error.flatten().fieldErrors)
+}
+
 export default {
-  reqBody: async (schema: ZodTypeAny, event: H3Event) => {
-    const reqBody = await readBody(event)
-    const res = schema.safeParse(reqBody)
-
-    //return only required schema data and strip extra keys without errors
-    if (res.success)
-      return res.data
-
-    return handler.validationError(event, res.error.flatten().fieldErrors)
-  },
-
-  reqQuery: (schema: ZodTypeAny, event: H3Event) => {
-    const reqQuery = getQuery(event);
-    const res = schema.safeParse(reqQuery)
-
-    //return only required schema data and strip extra keys without errors
-    if (res.success)
-      return res.data
-
-    return handler.validationError(event, res.error.flatten().fieldErrors)
-  }
+  reqBody: async (schema: ZodTypeAny, event: H3Event) => parse(schema, event, await readBody(event)),
+  reqQuery: (schema: ZodTypeAny, event: H3Event) => parse(schema, event, getQuery(event)),
+  routeParam: (schema: ZodTypeAny, event: H3Event, name: string) => parse(schema, event, getRouterParam(event, name)),
+  parse: parse
 }
