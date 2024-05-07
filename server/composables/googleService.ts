@@ -1,5 +1,5 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo } from "../types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo } from "../utils/types"
 
 export default class googleService {
 

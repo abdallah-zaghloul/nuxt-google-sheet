@@ -1,5 +1,5 @@
 import { Sheet as PrismaSheet } from "@prisma/client"
-import { Sheet, GoogleSpreadSheet } from "../types"
+import { Sheet, GoogleSpreadSheet } from "../utils/types"
 
 const getter = (sheet: PrismaSheet): Sheet => sheet as Sheet
 
