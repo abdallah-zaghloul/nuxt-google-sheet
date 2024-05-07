@@ -1,29 +1,58 @@
 import { H3Event } from "h3"
 
-const globalError = (event: H3Event) => sendError(event, createError({
+const sendAnError = ({
+  event,
+  statusCode,
+  statusMessage,
+  data
+}: {
+  event: H3Event,
+  statusCode: number
+  statusMessage: string,
+  data?: any
+}) => {
+
+  const error = createError({
+    statusCode,
+    statusMessage,
+    data
+  })
+  sendError(event, error)
+  return error
+}
+
+const sendResponse = (data?: any) => ({
+  statusCode: 200,
+  statusMessage: "Success",
+  stack: [],
+  data: data
+})
+
+const globalError = (event: H3Event) => sendAnError({
+  event: event,
   statusCode: 500,
-  data: {
-    message: "Sorry something went wrong please try again later"
-  }
-}))
+  statusMessage: "Sorry something went wrong please try again later"
+})
 
 export default {
-  validationError: (event: H3Event, data: any) => sendError(event, createError({
+  validationError: (event: H3Event, data: any) => sendAnError({
+    event: event,
     statusCode: 422,
+    statusMessage: "Please insert a valid data",
     data: data
-  })),
+  }),
 
   globalError: globalError,
 
   sync: (event: H3Event, fn: Function, catcher?: Function) => {
     try {
-      return fn()
+      return sendResponse(fn())
     } catch (error: any) {
       return catcher ? catcher() : globalError(event)
     }
   },
 
-  async: (event: H3Event, fn: () => Promise<any>, catcher?: Function) => fn().catch(
-    (error: any) => catcher ? catcher() : globalError(event)
-  ),
+  async: (event: H3Event, fn: () => Promise<any>, catcher?: Function) => fn()
+    .then(data => sendResponse(data))
+    .catch((error: any) => catcher ? catcher() : globalError(event)),
 }
