@@ -32,7 +32,7 @@ const setting = useSetting(getSetting.value)
         <Sheets />
       </template>
     </Card>
-    <NuxtLink to="/sheet/13">
+    <NuxtLink to="/sheet/3">
       Single page
     </NuxtLink>
   </div>
