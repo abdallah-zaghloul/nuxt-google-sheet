@@ -1,5 +1,5 @@
 import { Prisma, Setting as PrismaSetting } from "@prisma/client";
-import { Credentials, Setting, SettingReq } from "../types"
+import { Credentials, Setting, SettingReq } from "../utils/types"
 
 const getter = (setting: PrismaSetting) => (setting as Setting)
 const setter = (storeId: string, setting: Setting | SettingReq & { credentials?: Credentials | null }) => ({

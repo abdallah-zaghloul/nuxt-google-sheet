@@ -1,4 +1,4 @@
-import { GoogleSpreadSheet } from "../types"
+import { GoogleSpreadSheet } from "../utils/types"
 import sheetRepository from "./sheetRepository"
 
 

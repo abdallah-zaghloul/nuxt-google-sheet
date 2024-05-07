@@ -1,4 +1,4 @@
-import { Credentials, Setting, SettingReq } from "../types";
+import { Credentials, Setting, SettingReq } from "../utils/types";
 import settingRepository from "./settingRepository";
 
 
