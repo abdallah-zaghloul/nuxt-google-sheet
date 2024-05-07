@@ -42,8 +42,6 @@ export default {
     data: data
   }),
 
-  globalError: globalError,
-
   sync: (event: H3Event, fn: Function, catcher?: Function) => {
     try {
       return sendResponse(fn())
@@ -55,4 +53,11 @@ export default {
   async: (event: H3Event, fn: () => Promise<any>, catcher?: Function) => fn()
     .then(data => sendResponse(data))
     .catch((error: any) => catcher ? catcher() : globalError(event)),
+
+  sendError: sendAnError,
+
+  sendResponse: sendResponse,
+  
+  globalError: globalError,
+
 }
