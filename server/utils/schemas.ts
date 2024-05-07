@@ -42,7 +42,9 @@ const allowedHeaders: Headers = [
 ]
 
 const headersSchema = z.array(
-    z.enum(allowedHeaders)
+    z.enum(allowedHeaders, {
+        message: `please insert allowed header field names`
+    })
 ).refine(
     headers => headers.includes(orderId), {
     message: `${orderId} header should exists`,
