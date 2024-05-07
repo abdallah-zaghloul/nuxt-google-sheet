@@ -24,5 +24,15 @@ export default {
       storeId,
       id
     }
-  })
+  }),
+
+  delete: (storeId: string, id: string) => prisma.sheet.delete({
+    where: {
+      storeId,
+      id
+    }
+  }).then(
+    deleted => true,
+    failed => false
+  )
 }
