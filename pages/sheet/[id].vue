@@ -5,9 +5,10 @@ const route = useRoute();
 
 <template>
   <div class="container">
+    <BackNavButton to="/" label="Back to sheets" />
     <Card>
       <template #header>
-        <BackNavButton to="/" label="Back to sheets" />
+        <h2>Create Sheet</h2>
       </template>
       <template #headerAccessory>
         <ConnectedUser />
@@ -20,5 +21,9 @@ const route = useRoute();
 </template>
 
 <style scoped>
-
+.header {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
 </style>

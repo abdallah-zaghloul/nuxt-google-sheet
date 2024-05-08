@@ -31,7 +31,8 @@ defineProps<{
   gap: 4px;
   text-decoration: none;
   color: var(--brand-500);
-  transition: color 0.2s ease-in
+  transition: color 0.2s ease-in;
+  font: var(--text-sm-medium);
 }
 
 .link:hover {
