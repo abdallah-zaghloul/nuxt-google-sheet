@@ -17,12 +17,17 @@ const sheet = ref({
   prodcuts: [],
   fields: [{ name: "Order ID", id: 1, required: true }]
 });
+
+function handleSubmit(e: Event) {
+  e.preventDefault();
+  // TODO: call callback sent from props
+}
 </script>
 
 <template>
   <Card class="inner-card">
     <template #default>
-      <form class="form">
+      <form class="form" @submit="handleSubmit">
         <InputGroup>
           <template #label>
             Sheet name
