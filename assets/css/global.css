@@ -46,6 +46,11 @@ input, button, textarea, select {
 /*
   7. Avoid text overflows
 */
+
+a {
+  text-decoration: none;
+}
+
 p, h1, h2, h3, h4, h5, h6 {
   font: var(--text-md-regular);
   overflow-wrap: break-word;
