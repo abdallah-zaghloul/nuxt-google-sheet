@@ -22,16 +22,17 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 16px 0;
 }
 
 .link {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 16px 0;
   text-decoration: none;
   color: var(--brand-500);
-  transition: color 0.2s ease-in
+  transition: color 0.2s ease-in;
+  font: var(--text-sm-medium);
 }
 
 .link:hover {

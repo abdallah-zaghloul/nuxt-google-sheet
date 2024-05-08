@@ -8,9 +8,6 @@ const setting = useSetting(getSetting.value)
 
 <template>
   <div id="main-container" class="container">
-    <NuxtLink to="/bulk-sync">
-      Bulk Sync
-    </NuxtLink>
     <Card v-if="!setting?.isConnected">
       <template #header>
         <h2 class="main-header">
@@ -35,5 +32,8 @@ const setting = useSetting(getSetting.value)
         <Sheets />
       </template>
     </Card>
+    <NuxtLink to="/sheet/3">
+      Single page
+    </NuxtLink>
   </div>
 </template>
