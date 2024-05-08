@@ -1,21 +1,28 @@
-import { Prisma, Sheet as PrismaSheet } from "@prisma/client"
-import { Sheet, SheetCreate } from "../types"
+import { Sheet as PrismaSheet } from "@prisma/client"
+import { Sheet, GoogleSpreadSheet, PaginationQuery } from "../utils/types"
 
-const getter = (sheet: PrismaSheet): Sheet => ({
-  ...sheet,
-  fields: new Set(sheet.fields as Prisma.JsonArray),
-})
-
-const setter = (sheet: Sheet | SheetCreate) => ({
-  ...sheet,
-  fields: Array.from(sheet.fields)
-})
+const getter = (sheet: PrismaSheet): Sheet => sheet as Sheet
 
 export default {
-  create: (sheet: SheetCreate) => prisma.sheet.create({
-    data: setter(sheet)
+  create: (storeId: string, sheet: GoogleSpreadSheet) => prisma.sheet.create({
+    data: { ...sheet, storeId }
   }).then(
     (sheet: PrismaSheet) => getter(sheet)
   ),
 
+  paginate: (storeId: string, paginationQuery: PaginationQuery) => prisma.sheet.findMany({
+    take: paginationQuery.take,
+    skip: paginationQuery.skip,
+    where: { storeId },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  }).then(sheets => sheets.map(sheet => getter(sheet))),
+
+  find: (storeId: string, id: string) => prisma.sheet.findUnique({
+    where: {
+      storeId,
+      id
+    }
+  })
 }

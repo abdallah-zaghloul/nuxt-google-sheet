@@ -9,15 +9,18 @@ export type Setting = {
     storeId: string
     clientId: string,
     clientSecret: string
-    isConnected: boolean
-    credentials?: Credentials,
+    isConnected?: boolean
+    credentials?: Credentials | null,
+    email?: string,
     createdAt: Date,
     updatedAt: Date,
 }
+export type SettingReq = Pick<Setting, "clientId" | "clientSecret" | "isConnected">
 
 export type { Session }
 
-export type Field = 'Order ID' & (
+export type OrderId = "Order ID"
+export type Header = (
     | 'SKU'
     | 'Vendor'
     | 'Total tax'
@@ -55,16 +58,30 @@ export type Field = 'Order ID' & (
     | 'Total with customer currency'
 )
 
-export type Fields = Set<Field>;
+export type Headers = [OrderId] & Header[]
 
 export type Sheet = {
     id: string
     storeId: string
-    name: string,
-    fields: Fields
-    isActive: boolean
+    title: string,
+    headers: Headers
+    status: boolean
+    googleId: string
+    googleUrl: string
     createdAt: Date,
     updatedAt: Date,
 }
 
-export type SheetCreate = Pick<Sheet, 'storeId'|'name'|'fields'>
+export type GoogleSpreadSheet = Pick<Sheet, 'title' | 'headers' | 'googleId' | 'googleUrl'>
+
+export type UserProfileInfo = {
+    sub: string,
+    picture: string,
+    email: string,
+    email_verified: boolean
+}
+
+export type PaginationQuery = {
+    skip?: number,
+    take?: number
+}

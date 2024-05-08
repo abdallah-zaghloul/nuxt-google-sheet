@@ -36,6 +36,7 @@
     "googleapis": "^134.0.0",
     "isbot": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "zod": "^3.23.6"
   }
 }
