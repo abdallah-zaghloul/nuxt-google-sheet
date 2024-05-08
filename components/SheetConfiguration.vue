@@ -3,7 +3,6 @@ import draggable from "vuedraggable";
 import { InputGroup, Input, MultiselectDropdown, SecondaryButton } from '@youcan/ui-vue3'
 import { ref } from 'vue'
 
-
 const products: any[] = [];
 
 const allFields = ref([
