@@ -104,9 +104,11 @@ function handleSubmit(e: Event) {
           </template>
         </InputGroup>
         <div class="footer">
-          <SecondaryButton type="submit">
-            Cancel
-          </SecondaryButton>
+          <NuxtLink to="/">
+            <SecondaryButton type="submit">
+              Cancel
+            </SecondaryButton>
+          </NuxtLink>
           <PrimaryButton type="submit">
             Save
           </PrimaryButton>

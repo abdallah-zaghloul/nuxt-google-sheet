@@ -6,17 +6,19 @@ import { PrimaryButton, SecondaryButton } from '@youcan/ui-vue3'
   <Card class="inner-card">
     <template #headerAccessory>
       <div class="actions">
-        <SecondaryButton class="bulk-sinc">
-          <NuxtLink class="link" to="/bulk-sync">
-            Bulk-sync orders
-          </NuxtLink>
-        </SecondaryButton>
-        <PrimaryButton>
-          <template #icon>
-            <i class="i-youcan:plus"></i>
-          </template>
-          Create new sheet
-        </PrimaryButton>
+        <NuxtLink to="/bulk-sync">
+          <SecondaryButton>
+              Bulk-sync orders
+          </SecondaryButton>
+        </NuxtLink>
+        <NuxtLink to="/sheet/create">
+          <PrimaryButton>
+            <template #icon>
+              <i class="i-youcan:plus"></i>
+            </template>
+            Create new sheet
+          </PrimaryButton>
+        </NuxtLink>
       </div>
     </template>
     <template #header>
@@ -40,10 +42,11 @@ import { PrimaryButton, SecondaryButton } from '@youcan/ui-vue3'
 
 .inner-card .actions {
   display: flex;
+  align-items: center;
   gap: 8px
 }
 
-:deep(.base-button.secondary.bulk-sinc) {
+:deep(.base-button.secondary.bulk-sync) {
   padding: 0;
 }
 
