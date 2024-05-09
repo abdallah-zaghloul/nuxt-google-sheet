@@ -19,7 +19,8 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
   },
   data: setting,
   onPass: () => useApi.setSetting({
-    ...setting.value
+    ...setting.value,
+    isConnected: true
   }),
 })
 </script>
