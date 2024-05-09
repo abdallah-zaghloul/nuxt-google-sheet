@@ -29,8 +29,7 @@ const sheetRef = ref<Sheet>(defaultSheet);
 
 const products: any[] = [];
 
-async function handleSubmit(e: Event) {
-  e.preventDefault();
+async function handleSubmit() {
   await onSubmit(unref(sheetRef));
 }
 </script>
@@ -38,7 +37,7 @@ async function handleSubmit(e: Event) {
 <template>
   <Card class="inner-card">
     <template #default>
-      <form class="form" @submit="handleSubmit">
+      <form class="form" @submit.prevent="handleSubmit">
         <InputGroup>
           <template #label>
             Sheet name
