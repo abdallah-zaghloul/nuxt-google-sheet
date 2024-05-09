@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { SecondaryButton } from '@youcan/ui-vue3'
+import { useSetting } from '~/composables/useStates';
+const setting = useSetting();
 
+async function disconnect() {
+  // Disconnect
+  useApi.setSetting({ ...setting.value, isConnected: false })
+  // Redirect
+  window.location.reload();
+}
 </script>
 
 <template>
   <div class="container">
-    <p>Connected as: <span>wiw@wiwi.com</span></p>
-    <SecondaryButton class="disconnect">
+    <p v-if="setting?.email">Connected as: <span class="email">{{ setting?.email }}</span></p>
+    <SecondaryButton class="disconnect" @click="disconnect">
       <template #icon>
         <i class="icon i-youcan:sign-out"></i>
       </template>
@@ -34,5 +42,10 @@ import { SecondaryButton } from '@youcan/ui-vue3'
   .disconnect.base-button.secondary .icon
 ) {
   color: var(--gray-800);
+}
+
+.email {
+  max-width: 300px;
+  text-overflow: ellipsis;
 }
 </style>
