@@ -22,7 +22,7 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 16px 0;
+  padding-block-end: 16px;
 }
 
 .link {

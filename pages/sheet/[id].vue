@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import type { Sheet } from '../../components/utils/types'
+
+
+function handleSubmit(sheet: Sheet) {
+  console.log("[id]: Submit", sheet);
+}
 </script>
 
 <template>
@@ -12,7 +18,11 @@
         <ConnectedUser />
       </template>
       <template #default>
-        <SheetConfiguration />
+        <SheetConfiguration 
+          @submit="handleSubmit" 
+          submitLabel="Create" 
+          cancelLabel="Cancel"
+        />
       </template>
     </Card>
   </div>
