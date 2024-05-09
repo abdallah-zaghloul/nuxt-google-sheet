@@ -24,7 +24,6 @@ const sendAnError = ({
 const sendResponse = (data?: any) => ({
   statusCode: 200,
   statusMessage: "Success",
-  stack: [],
   data: data
 })
 
