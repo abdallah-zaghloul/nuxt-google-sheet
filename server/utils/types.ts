@@ -74,6 +74,8 @@ export type Sheet = {
 
 export type GoogleSpreadSheet = Pick<Sheet, 'title' | 'headers' | 'googleId' | 'googleUrl'>
 
+export type SheetUpdate = Partial<Pick<Sheet, 'title' | 'headers' | 'status'>>
+
 export type UserProfileInfo = {
     sub: string,
     picture: string,
@@ -85,3 +87,4 @@ export type PaginationQuery = {
     skip?: number,
     take?: number
 }
+

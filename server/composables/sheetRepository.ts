@@ -1,5 +1,5 @@
 import { Sheet as PrismaSheet } from "@prisma/client"
-import { Sheet, GoogleSpreadSheet, PaginationQuery } from "../utils/types"
+import { Sheet, GoogleSpreadSheet, PaginationQuery, SheetUpdate } from "../utils/types"
 
 const getter = (sheet: PrismaSheet): Sheet => sheet as Sheet
 
@@ -34,5 +34,15 @@ export default {
   }).then(
     deleted => true,
     failed => false
+  ),
+
+  update: (storeId: string, id: string, data: SheetUpdate) => prisma.sheet.update({
+    where: {
+      storeId,
+      id
+    },
+    data: data
+  }).then(
+    (sheet: PrismaSheet) => getter(sheet)
   )
 }

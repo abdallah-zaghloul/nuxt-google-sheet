@@ -70,3 +70,12 @@ export const sheetCreateSchema = z.object({
     title: z.string().min(1).max(191),
     headers: headersSchema,
 })
+
+export const sheetUpdateSchema = z.object({
+    title: z.string().min(1).max(191).optional(),
+    headers: headersSchema.optional(),
+    status: z.boolean().optional()
+}).refine(
+    data => Object.keys(data).length > 0, {
+    message: `at least one input required`,
+})
