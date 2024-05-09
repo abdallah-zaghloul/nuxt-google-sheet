@@ -2,7 +2,6 @@
 import type { Sheet } from '../../components/utils/types'
 import { toast } from '@youcan/ui-vue3/helpers';
 import type { ToastOptions } from '@youcan/ui-vue3/types';
-import { useApi } from '~/composables/useApi';
 
 
 async function handleSubmit(sheet: Sheet) {
@@ -16,13 +15,12 @@ async function handleSubmit(sheet: Sheet) {
     toast.show(toastOptions);
   } else {
     // Send request
-    const res = await createSheet(sheet);
+    await createSheet(sheet);
   }
 }
 
 async function createSheet(sheet: Sheet) {
   // Call API
-  return
 }
 
 </script>
