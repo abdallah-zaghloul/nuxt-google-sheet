@@ -1,5 +1,5 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo } from "../utils/types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, Sheet } from "../utils/types"
 
 export default class googleService {
 
@@ -11,6 +11,7 @@ export default class googleService {
   private prompt: string
   private valueInputOption: string
   private userInfoUrl: string
+  private updateableFields: { title: string, custom: string }
   //services
   private spreadSheetService: sheets_v4.Resource$Spreadsheets
 
@@ -27,6 +28,10 @@ export default class googleService {
     this.prompt = 'consent'
     this.valueInputOption = 'USER_ENTERED'
     this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    this.updateableFields = {
+      title: 'title',
+      custom: 'userEnteredValue'
+    }
     this.scope = [
       'https://www.googleapis.com/auth/userinfo.email', //user email info permission
       'https://www.googleapis.com/auth/spreadsheets', //spreedsheet permission
@@ -72,24 +77,87 @@ export default class googleService {
     return credentials
   }
 
-  public createSpreadSheet(title: string, headers: Headers) {
+  public createSpreadSheet(title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
     return this.spreadSheetService.create({
       requestBody: {
         properties: { title }
       }
+    }).then(({ data }) => this.spreadSheetService.values.update({
+      spreadsheetId: data.spreadsheetId!,
+      range: this.getSheetRange(data.sheets?.[0].properties?.title!, headers),
+      valueInputOption: this.valueInputOption,
+      requestBody: { values: [headers] }
     }).then(
-      (spreadSheetRes) => this.spreadSheetService.values.update({
-        spreadsheetId: spreadSheetRes.data.spreadsheetId!,
-        range: this.getSheetRange(spreadSheetRes.data.sheets?.[0].properties?.title!, headers),
-        valueInputOption: this.valueInputOption,
-        requestBody: { values: [headers] }
-      }).then((): GoogleSpreadSheet => ({
-        title: title,
-        headers: headers,
-        googleId: spreadSheetRes.data.spreadsheetId!,
-        googleUrl: spreadSheetRes.data.spreadsheetUrl!
-      })),
+      onfulfilled => this.spreadSheetGetter(title, headers, data.spreadsheetId!, data.spreadsheetUrl!),
+      onrejected => null
+    ))
+  }
+
+  public async batchUpdateSpreadSheet(sheet: Sheet, title?: string, headers?: Headers): Promise<GoogleSpreadSheet | null> {
+
+    title ??= sheet.title
+    headers ??= sheet.headers
+
+    return this.spreadSheetService.batchUpdate({
+      spreadsheetId: sheet.googleId,
+      requestBody: {
+        requests: [
+          this.getUpdateSpreadSheetTitleRequest(title),
+          ...(await this.getUpdateSheetsHeadersRequests(sheet.googleId, headers))!
+        ],
+      },
+    }).then(
+      onfulfilled => this.spreadSheetGetter(title, headers, sheet.googleId, sheet.googleUrl),
+      onrejected => null
     )
+  }
+
+  private spreadSheetGetter(title: string, headers: Headers, spreadSheetId: string, spreadSheetUrl: string): GoogleSpreadSheet {
+    return {
+      title: title,
+      headers: headers,
+      googleId: spreadSheetId,
+      googleUrl: spreadSheetUrl
+    }
+  }
+
+  private getSheets(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet[]> {
+    return this.spreadSheetService.get({
+      spreadsheetId: spreadSheetId
+    }).then(
+      ({ data: spreadSheet }) => spreadSheet.sheets!
+    )
+  }
+
+  private getUpdateSpreadSheetTitleRequest(title: string): sheets_v4.Schema$Request {
+    return {
+      updateSpreadsheetProperties: {
+        properties: {
+          title: title,
+        },
+        fields: this.updateableFields.title,
+      },
+    }
+  }
+
+  private getUpdateSheetsHeadersRequests(spreadSheetId: string, headers: Headers): Promise<sheets_v4.Schema$Request[]> {
+    return this.getSheets(spreadSheetId).then(sheets => sheets?.map(sheet => ({
+      updateCells: {
+        rows: [
+          {
+            values: headers.map((header) => ({
+              userEnteredValue: { stringValue: header }
+            })),
+          }
+        ],
+        fields: this.updateableFields.custom,
+        start: {
+          sheetId: sheet.properties?.sheetId,
+          rowIndex: 0, // Assuming headers are in the first row
+          columnIndex: 0
+        }
+      }
+    }))!)
   }
 
   public getSheetRange(sheetTitle: string, headers: Headers) {

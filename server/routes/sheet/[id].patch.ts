@@ -1,3 +1,4 @@
+import googleService from "~/server/composables/googleService"
 import settingService from "~/server/composables/settingService"
 import sheetService from "~/server/composables/sheetService"
 import { sheetUpdateSchema, uuidSchema } from "~/server/utils/schemas"
@@ -9,5 +10,7 @@ export default defineEventHandler((event) => handler.async(event, async () => {
   const reqBody: SheetUpdate = await validator.reqBody(sheetUpdateSchema, event)
   const storeId = getStoreId(event)
   const setting = await settingService.get(storeId)
-  return sheetService.update(storeId, id, reqBody)
+  const sheet = await sheetService.get(storeId, id)!
+  const googleSpreadSheet = await googleService.initClient(setting!).batchUpdateSpreadSheet(sheet!, reqBody.title, reqBody.headers)
+  return googleSpreadSheet ? sheetService.update(storeId, id, reqBody) : handler.globalError(event)
 }))
