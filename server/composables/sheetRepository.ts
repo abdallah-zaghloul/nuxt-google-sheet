@@ -24,7 +24,9 @@ export default {
       storeId,
       id
     }
-  }),
+  }).then(
+    (sheet: PrismaSheet | null) => sheet ? getter(sheet) : null,
+  ),
 
   delete: (storeId: string, id: string) => prisma.sheet.delete({
     where: {
