@@ -60,7 +60,11 @@ same as nuxt response
   "stack": [] //error stack empty if debug is disabled
 }
 ```
-
+available Status/Http codes:
+- 422: unprocessable entity (validation)
+- 404: not found
+- 200: success
+- 500: internal server (global error)
 ## How to run the project:
 
 ### requirements:
@@ -70,7 +74,7 @@ same as nuxt response
 - youcan CLI
 
 ### steps:
-- should have a configured youcan partner app
+- should have a installed configured youcan partner app
   acc to this [instructions](https://developer.youcan.shop/apps/theme_extension/getstarted#set-up-youcan-cli)
 - copy .env.example & fill its variables
 - ```pnpm install```
