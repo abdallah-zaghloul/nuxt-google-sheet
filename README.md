@@ -4,15 +4,16 @@
 
 ### Requirements:
 - See the requirements page: https://developer.youcan.shop/apps/embedded_app/getstarted#requirements
-- Make sure you have a MySQL server running, you can either use MAMP, WAMP, or a Docker MySQL image.
+- Runing MySQL server: starting from version 5.7.8 (recomended latest)
 
 ### Getting Started 🚀:
 - Clone the repo
-- Copy the contents of `.env.example` into a `.env` file and fill their values
+- Create empty MYSQL database
+- Copy `.env.example` into a `.env` file and fill its own values
 - `cd` into the project
 - Run `pnpm install` to install the dependencies
 - Run `youcan auth login` to authenticate with YouCan
-- Run `pnpm prisma migrate dev` to generate the database and its tables.
+- Run `pnpm prisma migrate dev` to generate the database and its tables
 - Run `youcan app install` to install the app on your dev store.
 - Run `pnpm dev` to start the project and sync your settings with your partners app settings
 
@@ -50,7 +51,10 @@
 - Pages
 - Public: static Imgs
 - Types
-<img width="716" alt="Screenshot 2024-05-10 at 3 19 36 PM" src="https://github.com/eihabkhan1/nuxt-google-sheet/assets/143792300/fb275cba-0002-42bb-bed7-6eafc2b610a0">
+
+<br>
+<img src="https://github.com/eihabkhan1/nuxt-google-sheet/assets/143792300/fb275cba-0002-42bb-bed7-6eafc2b610a0" width="400">
+<br>
 <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/acc5a924-4217-4d6c-a6ac-8ba97d175b60" width="400">
 
 
@@ -61,7 +65,7 @@ both frontend and backend is decoupled
 - they can be (separated/attached at same time) :
   - separated to microServices
   - attached and share something like:
-    error state: useError, sendError
+    error state (useError, sendError)
     acc to the below pic  
   
 <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/19a79135-94fd-4e87-9bdd-834c27ab7223" width="400">
@@ -77,3 +81,8 @@ same as nuxt response
   "stack": [] //error stack empty if debug is disabled
 }
 ```
+available Status/Http codes:
+- 422: unprocessable entity (validation)
+- 404: not found
+- 200: success
+- 500: internal server (global error)
