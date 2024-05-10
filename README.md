@@ -1,4 +1,21 @@
 # Google Sheet Embedded App Using nuxt
+
+## How to run the project:
+
+### Requirements:
+- See the requirements page: https://developer.youcan.shop/apps/embedded_app/getstarted#requirements
+- Make sure you have a MySQL server running, you can either use MAMP, WAMP, or a Docker MySQL image.
+
+### Getting Started 🚀:
+- Clone the repo
+- Copy the contents of `.env.example` into a `.env` file and fill their values
+- `cd` into the project
+- Run `pnpm install` to install the dependencies
+- Run `youcan auth login` to authenticate with YouCan
+- Run `pnpm prisma migrate dev` to generate the database and its tables.
+- Run `youcan app install` to install the app on your dev store.
+- Run `pnpm dev` to start the project and sync your settings with your partners app settings
+
 ## Description:
   youcan google sheet is a partner embedded app utilize
   google service and youcan service to: 
@@ -33,7 +50,7 @@
 - Pages
 - Public: static Imgs
 - Types
-
+<img width="716" alt="Screenshot 2024-05-10 at 3 19 36 PM" src="https://github.com/eihabkhan1/nuxt-google-sheet/assets/143792300/fb275cba-0002-42bb-bed7-6eafc2b610a0">
 <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/acc5a924-4217-4d6c-a6ac-8ba97d175b60" width="400">
 
 
@@ -60,20 +77,3 @@ same as nuxt response
   "stack": [] //error stack empty if debug is disabled
 }
 ```
-
-## How to run the project:
-
-### requirements:
-- nodeJs +V 18
-- pnpm package manager
-- mysql 8.0
-- youcan CLI
-
-### steps:
-- should have a configured youcan partner app
-  acc to this [instructions](https://developer.youcan.shop/apps/theme_extension/getstarted#set-up-youcan-cli)
-- copy .env.example & fill its variables
-- ```pnpm install```
-- ```youcan auth login```
-- ```pnpm prisma migrate dev```
-- ```pnpm dev```
