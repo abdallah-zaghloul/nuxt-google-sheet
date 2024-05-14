@@ -1,4 +1,4 @@
-import type { UseFetchOptions } from "nuxt/app";
+import { useFetch, type UseFetchOptions } from "nuxt/app";
 import type { Setting } from "../types";
 
 const fetcher = <T>(url: string, options?: UseFetchOptions<unknown, unknown>) => useFetch<T>(url, {

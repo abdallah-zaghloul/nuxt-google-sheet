@@ -14,7 +14,7 @@ async function disconnect() {
 <template>
   <div class="container">
     <p v-if="setting?.email">Connected as: <span class="email">{{ setting?.email }}</span></p>
-    <SecondaryButton class="disconnect" @click="disconnect">
+    <SecondaryButton class="disconnect" @click.stop="disconnect">
       <template #icon>
         <i class="icon i-youcan:sign-out"></i>
       </template>

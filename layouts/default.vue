@@ -1,9 +1,10 @@
 <script setup lang="ts">
-
+import { ToastContainer } from '@youcan/ui-vue3';
 </script>
 
 <template>
   <div class="app-wrapper">
+    <ToastContainer :limit="3" position="top-right"/>
     <slot />
   </div>
 </template>

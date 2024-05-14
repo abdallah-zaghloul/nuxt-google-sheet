@@ -1,4 +1,28 @@
 <script setup lang="ts">
+import type { Sheet } from '../../components/utils/types'
+import { toast } from '@youcan/ui-vue3/helpers';
+import type { ToastOptions } from '@youcan/ui-vue3/types';
+
+
+async function handleSubmit(sheet: Sheet) {
+  // Won't use validator as it is an overkill, only one field is required: name.
+  if (!sheet?.name) {
+    const toastOptions: ToastOptions = {
+    title: 'Name is required',
+    description: 'Name cannot be empty',
+    type: 'error',
+  };
+    toast.show(toastOptions);
+  } else {
+    // Send request
+    await createSheet(sheet);
+  }
+}
+
+async function createSheet(sheet: Sheet) {
+  // Call API
+}
+
 </script>
 
 <template>
@@ -12,7 +36,7 @@
         <ConnectedUser />
       </template>
       <template #default>
-        <SheetConfiguration />
+        <SheetConfiguration :onSubmit="handleSubmit" />
       </template>
     </Card>
   </div>

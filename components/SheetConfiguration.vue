@@ -1,38 +1,49 @@
 <script setup lang="ts">
 import draggable from "vuedraggable";
 import { InputGroup, Input, MultiselectDropdown, SecondaryButton } from '@youcan/ui-vue3'
-import { ref } from 'vue'
+import { ref, unref } from 'vue'
+import type { Field, Sheet, SheetConfigurationProps } from './utils/types'
+
+const DEFAULT_FIELDS = [ { name: "Order ID", required: true } ]
+const DEFAULT_SHEET: Sheet = {
+  fields: DEFAULT_FIELDS,
+  name: '',
+  products: []
+}
+
+const { onSubmit, sheet } = withDefaults(defineProps<SheetConfigurationProps>(), {
+  cancelLabel: 'Cancel',
+  submitLabel: 'Save',
+  onSubmit: () => {},
+});
+
+const allFields = ref<Field[]>([
+  { name: "Order date" },
+  { name: "First name" },
+  { name: "Last name" },
+]);
+
+const defaultSheet = sheet ? sheet : DEFAULT_SHEET
+
+const sheetRef = ref<Sheet>(defaultSheet);
 
 const products: any[] = [];
 
-const allFields = ref([
-  { name: "Order date", id: 5 },
-  { name: "First name", id: 6 },
-  { name: "Last name", id: 7 },
-]);
-
-const sheet = ref({
-  name: '',
-  prodcuts: [],
-  fields: [{ name: "Order ID", id: 1, required: true }]
-});
-
-function handleSubmit(e: Event) {
-  e.preventDefault();
-  // TODO: call callback sent from props
+async function handleSubmit() {
+  await onSubmit(unref(sheetRef));
 }
 </script>
 
 <template>
   <Card class="inner-card">
     <template #default>
-      <form class="form" @submit="handleSubmit">
+      <form class="form" @submit.prevent="handleSubmit">
         <InputGroup>
           <template #label>
             Sheet name
           </template>
           <template #input>
-          <Input id="sheet-name" v-model="sheet.name" placeholder="My orders" />
+          <Input id="sheet-name" v-model="sheetRef.name" placeholder="My orders" />
           </template>
         </InputGroup>
         <InputGroup>
@@ -41,7 +52,7 @@ function handleSubmit(e: Event) {
           </template>
           <template #input>
             <MultiselectDropdown
-              v-model="sheet.prodcuts"
+              v-model="sheetRef.products"
               :searchable="true"
               :items="products"
               label="Search products"
@@ -59,7 +70,7 @@ function handleSubmit(e: Event) {
                   <p>Selected fields</p>
                 </div>
                 <draggable 
-                  v-model="sheet.fields" 
+                  v-model="sheetRef.fields" 
                   group="fields"  
                   item-key="id"
                   class="list">
@@ -82,7 +93,7 @@ function handleSubmit(e: Event) {
                   <p>Available fields</p>
                 </div>
                 <div class="empty-state">
-                  <span v-if="allFields.length === 0 && sheet.fields.length > 1">No more fields</span> 
+                  <span v-if="allFields.length === 0 && sheetRef.fields.length > 1">No more fields</span> 
                   <span v-else-if="allFields.length === 0">No fields available</span>
                 </div>
                 <draggable
@@ -106,11 +117,11 @@ function handleSubmit(e: Event) {
         <div class="footer">
           <NuxtLink to="/">
             <SecondaryButton type="submit">
-              Cancel
+              {{ cancelLabel }}
             </SecondaryButton>
           </NuxtLink>
           <PrimaryButton type="submit">
-            Save
+            {{submitLabel }}
           </PrimaryButton>
         </div>
       </form>
@@ -249,4 +260,4 @@ function handleSubmit(e: Event) {
   margin-block-start: 16px;
   border-block-start: 1px solid var(--gray-200);
 }
-</style>
+</style>./utils/sheet
