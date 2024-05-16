@@ -6,9 +6,11 @@ export default class youcanService {
   private session: Session
 
   private tokenType: string
-  private webhookUrls: {
+  private urls: {
+    base: string,
     subscribe: string,
-    list: string
+    list: string,
+    syncOrderCallback: string,
   }
   private events: {
     orderCreate: string
@@ -25,9 +27,11 @@ export default class youcanService {
 
     //youcan static options
     this.tokenType = 'Bearer'
-    this.webhookUrls = {
-      subscribe: 'https://api.youcan.shop/resthooks/subscribe',
-      list: 'https://api.youcan.shop/resthooks/list'
+    this.urls = {
+      base: process.env.YOUCAN_BASE_URL!,
+      subscribe: `${process.env.YOUCAN_BASE_URL!}/resthooks/subscribe`,
+      list: `${process.env.YOUCAN_BASE_URL!}/resthooks/list`,
+      syncOrderCallback: process.env.YOUCAN_SYNC_ORDER_CALLBACK_URL!
     }
 
     this.events = {
@@ -35,33 +39,34 @@ export default class youcanService {
     }
   }
 
-  private call(url: string, options?: RequestInit) {
+  private call(url: string, options?: RequestInit): Promise<Response> {
     return fetch(url, {
       ...options,
       headers: {
-        Authorization: `${this.tokenType} ${this.session.accessToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `${this.tokenType} ${this.session.accessToken} `,
+        'Content-Type': 'application/json',
       },
     })
   }
 
-  public listSubscriptions() {
-    return this.call(this.webhookUrls.list)
+  public listSubscriptions(): Promise<Response> {
+    return this.call(this.urls.list)
   }
 
-  private subscribe(reqBody: { targetUrl: string, event: string }) {
-    return this.call(this.webhookUrls.subscribe, {
+  private subscribe(reqBody: { target_url: string, event: string }): Promise<Response> {
+    return this.call(this.urls.subscribe, {
       method: 'POST',
       body: JSON.stringify(reqBody)
     })
   }
 
-  public async subscribeCreatedOrder() {
-    const res = await this.subscribe({
-      targetUrl: process.env.YOUCAN_SYNC_ORDER_CALLBACK_URL!,
+  public subscribeCreatedOrder(): Promise<Boolean> {
+    return this.subscribe({
+      target_url: this.urls.syncOrderCallback,
       event: this.events.orderCreate
-    })
-    console.log(res)
-    return res
+    }).then(
+      res => res.ok,
+    )
   }
+
 }
