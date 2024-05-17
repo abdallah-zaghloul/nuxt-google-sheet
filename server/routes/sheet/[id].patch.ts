@@ -11,6 +11,6 @@ export default defineEventHandler((event) => handler.async(event, async () => {
   const storeId = getStoreId(event)
   const setting = await settingService.get(storeId)
   const sheet = await sheetService.get(storeId, id)!
-  const googleSpreadSheet = await googleService.initClient(setting!).batchUpdateSpreadSheet(sheet!, reqBody.title, reqBody.headers)
+  const googleSpreadSheet = await googleService.initClient(setting!).updateSpreadSheet(sheet!, reqBody.title, reqBody.headers)
   return googleSpreadSheet ? sheetService.update(storeId, id, reqBody) : handler.globalError(event)
 }))
