@@ -1,4 +1,4 @@
-import { Session } from "../utils/types";
+import { Session, YouCanWebhookSub, YouCanWebhookSubs, YouCanWebhookUnSub } from "../utils/types";
 
 export default class youcanService {
 
@@ -9,6 +9,7 @@ export default class youcanService {
   private urls: {
     base: string,
     subscribe: string,
+    unsubscribe: string,
     list: string,
     syncOrderCallback: string,
   }
@@ -30,6 +31,7 @@ export default class youcanService {
     this.urls = {
       base: process.env.YOUCAN_BASE_URL!,
       subscribe: `${process.env.YOUCAN_BASE_URL!}/resthooks/subscribe`,
+      unsubscribe: `${process.env.YOUCAN_BASE_URL!}/resthooks/unsubscribe`,
       list: `${process.env.YOUCAN_BASE_URL!}/resthooks/list`,
       syncOrderCallback: process.env.YOUCAN_SYNC_ORDER_CALLBACK_URL!
     }
@@ -39,34 +41,62 @@ export default class youcanService {
     }
   }
 
-  private call(url: string, options?: RequestInit): Promise<Response> {
+  private call<T>(url: string, options?: RequestInit): Promise<T> {
     return fetch(url, {
       ...options,
       headers: {
-        Authorization: `${this.tokenType} ${this.session.accessToken} `,
+        Authorization: `${this.tokenType} ${this.session.accessToken}`,
         'Content-Type': 'application/json',
       },
-    })
+    }).then(
+      res => check(res.ok, res) ? res.json() : null
+    )
   }
 
-  public listSubscriptions(): Promise<Response> {
-    return this.call(this.urls.list)
+  public listSubscriptions(): Promise<YouCanWebhookSubs> {
+    return this.call<YouCanWebhookSubs>(this.urls.list)
   }
 
-  private subscribe(reqBody: { target_url: string, event: string }): Promise<Response> {
-    return this.call(this.urls.subscribe, {
+  public async unSubscribeAll(): Promise<boolean> {
+    const subs = await this.listSubscriptions()
+    return this.batchUnSubscribe(subs)
+  }
+
+  private batchUnSubscribe(subs: YouCanWebhookSubs): Promise<boolean> {
+    const unsubs = Promise.allSettled(subs.map(sub => this.unSubscribe(sub.id)))
+    return unsubs.then(
+      res => check(true, res),
+      err => check(false, err)
+    )
+  }
+
+
+  public async unSubscribeCreateOrderSubs(): Promise<boolean> {
+    const orderCreateSubs = await this.listSubscriptions().then(
+      subs => subs.filter(sub => (sub.event === this.events.orderCreate))
+    )
+    return this.batchUnSubscribe(orderCreateSubs)
+  }
+
+  private subscribe(reqBody: YouCanWebhookSub): Promise<{ id: string }> {
+    return this.call<{ id: string }>(this.urls.subscribe, {
       method: 'POST',
       body: JSON.stringify(reqBody)
     })
   }
 
-  public subscribeCreatedOrder(): Promise<Boolean> {
+  private unSubscribe(id: string): Promise<YouCanWebhookUnSub> {
+    return this.call<YouCanWebhookUnSub>(`${this.urls.unsubscribe}/${id}`, {
+      method: 'POST',
+    })
+  }
+
+
+  public subscribeCreatedOrder(): Promise<{ id: string }> {
     return this.subscribe({
       target_url: this.urls.syncOrderCallback,
       event: this.events.orderCreate
-    }).then(
-      res => res.ok,
-    )
+    })
   }
 
 }
