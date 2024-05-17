@@ -1,5 +1,5 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, Sheet } from "../utils/types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, Sheet, CreateOrderEvent } from "../utils/types"
 
 export default class googleService {
 
@@ -178,5 +178,50 @@ export default class googleService {
 
   public getEmail(): Promise<string | null> {
     return this.getProfile().then(profile => profile?.email || null)
+  }
+
+  public orderEventToSheetRow(orderEvent: CreateOrderEvent): { [key in (Header | OrderId)]: any } {
+
+    return {
+      "Order ID": orderEvent.id,
+      /* customer */
+      "First name": orderEvent.customer?.first_name,
+      "Last name": orderEvent.customer?.last_name,
+      "Full name": orderEvent.customer?.full_name,
+      "Email": orderEvent.customer?.email,
+      "Phone": orderEvent.customer?.phone,
+      "Country": orderEvent.customer?.country,
+      // "Region": orderEvent.customer?,
+      "City": orderEvent.customer.city,
+      // "Address city": orderEvent.customer?.address,
+      // "Address state": orderEvent.customer?.address,
+      // "Address country": orderEvent.customer?.address,
+      // "Address currency": orderEvent.customer?.address,
+      // "Address zip code": orderEvent.customer?.address,
+      // "Address 1": orderEvent.customer?.address,
+      // "Address 2": orderEvent.customer?.address,
+      // "Full address": orderEvent.customer?.address,
+
+      /* order */
+      //  "SKU": orderEvent /* Stock Keeping Unit */
+      //  "Vendor": orderEvent,
+      //  "Total tax": orderEvent,
+      "Order date": orderEvent.created_at,
+      //  "Total charge": orderEvent,
+      //  "Total coupon": orderEvent,
+      "Total shipping fees": orderEvent.shipping?.price,
+      "Payment status": orderEvent.payment?.status,
+      "Total discount": orderEvent.discount?.value,
+      //  "Total quantity": orderEvent,
+      //  "Payment gateway": orderEvent.payment?
+      "Shipping status": orderEvent.shipping?.status,
+      "Tracking number": orderEvent.shipping?.tracking_number,
+      //  "Product name": orderEvent,
+      //  "Product URL": orderEvent,
+      //  "Product variant": orderEvent.variants?,
+      //  "Variant price": orderEvent.variants?,
+      "Order customer currency": orderEvent.customer_currency?.code,
+      "Total with customer currency": orderEvent.total
+    }
   }
 }
