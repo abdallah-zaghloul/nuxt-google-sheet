@@ -1,4 +1,3 @@
-import getCurrentSession from "~/server/utils/getCurrentSession"
 import crypto from "node:crypto";
 import googleService from "~/server/composables/googleService";
 import settingService from "~/server/composables/settingService";
@@ -18,13 +17,10 @@ export default defineEventHandler((event) => handler.async(event, async () => {
 
   const setting = await settingService.get(reqBody.store_id)
   const googleClientService = googleService.initClient(setting!)
-  const sheet = (await sheetService.getAll(reqBody.store_id, { take: 20 })).at(0)
-  const updateRes = await googleClientService.orderEventToSheetRow(reqBody)
+  const syncableSheets = await sheetService.getSyncables(reqBody.store_id)
 
-  console.log({
-    setting,
-    sheet,
-    updateRes
-  })
+  return Promise.allSettled(
+    syncableSheets.map(sheet => googleClientService.appendOrderToSheet(sheet.googleId, reqBody, sheet.headers))
+  )
 
 }))

@@ -74,6 +74,8 @@ export type Sheet = {
   updatedAt: Date,
 }
 
+export type SyncableSheet = Pick<Sheet, "id" | "googleId" | "headers">
+
 export type GoogleSpreadSheet = Pick<Sheet, "title" | "headers" | "googleId" | "googleUrl">
 
 export type SheetUpdate = Partial<Pick<Sheet, "title" | "headers" | "status">>

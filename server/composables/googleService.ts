@@ -10,6 +10,8 @@ export default class googleService {
   private scope: string[]
   private accessType: string
   private prompt: string
+  private valueInputOption: string
+  private range: string
   private mainSheetTitle: string
   private userInfoUrl: string
   private updateableFields: { title: string, custom: string }
@@ -29,6 +31,8 @@ export default class googleService {
     this.prompt = 'consent'
     this.mainSheetTitle = 'Youcan-Orders'
     this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    this.valueInputOption = 'USER_ENTERED',
+      this.range = `${this.mainSheetTitle}!A1:Z1`
     this.updateableFields = {
       title: 'title',
       custom: 'userEnteredValue'
@@ -200,6 +204,18 @@ export default class googleService {
   }
 
 
+  public appendOrderToSheet(spreadSheetId: string, orderEvent: CreateOrderEvent, headers: Headers) {
+    return this.spreadSheetService.values.append({
+      spreadsheetId: spreadSheetId,
+      range: this.range,
+      valueInputOption: this.valueInputOption,
+      requestBody: {
+        values: [this.orderEventToSheetRow(orderEvent, headers)]
+      }
+    })
+  }
+
+
 
   private spreadSheetGetter({ res, title, headers, googleId, googleUrl }: {
     res: GaxiosResponse,
@@ -265,48 +281,50 @@ export default class googleService {
 
 
 
-  public orderEventToSheetRow(orderEvent: CreateOrderEvent): { [key in (Header | OrderId)]: any } {
-    //@ts-ignore
-    return {
-      "Order ID": orderEvent.id,
+  public orderEventToSheetRow(orderEvent: CreateOrderEvent, headers: Headers): (string | number | null | undefined)[] {
+
+    const order = {
+      "Order ID": orderEvent?.ref,
       /* customer */
-      "First name": orderEvent.customer?.first_name,
-      "Last name": orderEvent.customer?.last_name,
-      "Full name": orderEvent.customer?.full_name,
-      "Email": orderEvent.customer?.email,
-      "Phone": orderEvent.customer?.phone,
-      "Country": orderEvent.customer?.country,
-      // "Region": orderEvent.customer?,
-      "City": orderEvent.customer.city,
-      // "Address city": orderEvent.customer?.address,
-      // "Address state": orderEvent.customer?.address,
-      // "Address country": orderEvent.customer?.address,
-      // "Address currency": orderEvent.customer?.address,
-      // "Address zip code": orderEvent.customer?.address,
-      // "Address 1": orderEvent.customer?.address,
-      // "Address 2": orderEvent.customer?.address,
-      // "Full address": orderEvent.customer?.address,
+      "First name": orderEvent?.customer?.first_name,
+      "Last name": orderEvent?.customer?.last_name,
+      "Full name": orderEvent?.customer?.full_name,
+      "Email": orderEvent?.customer?.email,
+      "Phone": orderEvent?.customer?.phone,
+      "Country": orderEvent?.customer?.country,
+      // "Region": orderEvent?.customer?,
+      "City": orderEvent?.customer?.city,
+      // "Address city": orderEvent?.customer?.address,
+      // "Address state": orderEvent?.customer?.address,
+      // "Address country": orderEvent?.customer?.address,
+      // "Address currency": orderEvent?.customer?.address,
+      // "Address zip code": orderEvent?.customer?.address,
+      // "Address 1": orderEvent?.customer?.address,
+      // "Address 2": orderEvent?.customer?.address,
+      // "Full address": orderEvent?.customer?.address,
 
       /* order */
-      //  "SKU": orderEvent /* Stock Keeping Unit */
-      //  "Vendor": orderEvent,
-      //  "Total tax": orderEvent,
-      "Order date": orderEvent.created_at,
-      //  "Total charge": orderEvent,
-      //  "Total coupon": orderEvent,
-      "Total shipping fees": orderEvent.shipping?.price,
-      "Payment status": orderEvent.payment?.status,
-      "Total discount": orderEvent.discount?.value,
-      //  "Total quantity": orderEvent,
-      //  "Payment gateway": orderEvent.payment?
-      "Shipping status": orderEvent.shipping?.status,
-      "Tracking number": orderEvent.shipping?.tracking_number,
-      //  "Product name": orderEvent,
-      //  "Product URL": orderEvent,
-      //  "Product variant": orderEvent.variants?,
-      //  "Variant price": orderEvent.variants?,
-      "Order customer currency": orderEvent.customer_currency?.code,
-      "Total with customer currency": orderEvent.total
+      //  "SKU": orderEvent? /* Stock Keeping Unit */
+      //  "Vendor": orderEvent?,
+      //  "Total tax": orderEvent?,
+      "Order date": orderEvent?.created_at,
+      //  "Total charge": orderEvent?,
+      //  "Total coupon": orderEvent?,
+      "Total shipping fees": orderEvent?.shipping?.price,
+      "Payment status": orderEvent?.payment?.status,
+      "Total discount": orderEvent?.discount?.value,
+      //  "Total quantity": orderEvent?,
+      //  "Payment gateway": orderEvent?.payment?
+      "Shipping status": orderEvent?.shipping?.status,
+      "Tracking number": orderEvent?.shipping?.tracking_number,
+      //  "Product name": orderEvent?,
+      //  "Product URL": orderEvent?,
+      //  "Product variant": orderEvent?.variants?,
+      //  "Variant price": orderEvent?.variants?,
+      "Order customer currency": orderEvent?.customer_currency?.code,
+      "Total with customer currency": orderEvent?.total
     }
+
+    return headers.map(header => order?.[header])
   }
 }
