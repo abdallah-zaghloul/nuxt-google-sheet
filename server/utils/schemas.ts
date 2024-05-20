@@ -2,7 +2,7 @@ import { z } from "zod"
 import { Headers, OrderId } from "./types"
 
 const orderId: OrderId = "Order ID"
-const allowedHeaders: Headers = [
+export const allowedHeaders: Headers = [
     orderId,
     "SKU",
     "Vendor",
