@@ -1,6 +1,6 @@
 import { google, sheets_v4 } from "googleapis"
 import { GaxiosResponse } from "gaxios"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, Sheet, CreateOrderEvent } from "../utils/types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
 
 export default class googleService {
 
@@ -177,19 +177,15 @@ export default class googleService {
 
 
 
-  public async updateSpreadSheet(sheet: Sheet, title?: string, headers?: Headers): Promise<GoogleSpreadSheet | null> {
-
-    title ??= sheet.title
-    headers ??= sheet.headers
-
+  public async updateSpreadSheet(spreadSheetId: string, title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
     return this.spreadSheetService.batchUpdate({
-      spreadsheetId: sheet.googleId,
+      spreadsheetId: spreadSheetId,
       requestBody: {
         //saves another request "returns updated spreadSheet object at response"
         includeSpreadsheetInResponse: true,
         requests: [
           this.spreadSheetReq().updateSpreadSheetTitle(title),
-          await this.spreadSheetReq().updateMainSheetHeaders(sheet.googleId, headers)
+          await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
         ],
       },
     }).then(

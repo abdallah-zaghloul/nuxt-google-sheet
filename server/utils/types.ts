@@ -78,7 +78,7 @@ export type SyncableSheet = Pick<Sheet, "id" | "googleId" | "headers">
 
 export type GoogleSpreadSheet = Pick<Sheet, "title" | "headers" | "googleId" | "googleUrl">
 
-export type SheetUpdate = Partial<Pick<Sheet, "title" | "headers" | "status">>
+export type SheetUpdate = Pick<Sheet, "title" | "headers" | "status">
 
 export type UserProfileInfo = {
   sub: string,

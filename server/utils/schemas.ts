@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { Headers, OrderId } from "./types"
+import { Headers, OrderId, Sheet } from "./types"
 
 const orderId: OrderId = "Order ID"
 const allowedHeaders: Headers = [
@@ -71,11 +71,17 @@ export const sheetCreateSchema = z.object({
     headers: headersSchema,
 })
 
-export const sheetUpdateSchema = z.object({
+export const sheetUpdateSchema = (sheet: Sheet) => z.object({
     title: z.string().min(1).max(191).optional(),
     headers: headersSchema.optional(),
     status: z.boolean().optional()
 }).refine(
     data => Object.keys(data).length > 0, {
     message: `at least one input required`,
-})
+}).transform(
+    data => ({
+        title: data.title ?? sheet.title,
+        headers: data.headers ? sheet.headers.concat(data.headers.filter(header => !sheet.headers.includes(header))) : sheet.headers,
+        status: data.status ?? sheet.status,
+    })
+)

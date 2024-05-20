@@ -7,10 +7,10 @@ import { SheetUpdate } from "~/server/utils/types"
 
 export default defineEventHandler((event) => handler.async(event, async () => {
   const id = validator.routeParam(uuidSchema, event, 'id')
-  const reqBody: SheetUpdate = await validator.reqBody(sheetUpdateSchema, event)
   const storeId = getStoreId(event)
-  const setting = await settingService.get(storeId)
   const sheet = await sheetService.get(storeId, id)!
-  const googleSpreadSheet = await googleService.initClient(setting!).updateSpreadSheet(sheet!, reqBody.title, reqBody.headers)
+  const reqBody: SheetUpdate = await validator.reqBody(sheetUpdateSchema(sheet!), event)
+  const setting = await settingService.get(storeId)
+  const googleSpreadSheet = await googleService.initClient(setting!).updateSpreadSheet(sheet!.googleId, reqBody.title!, reqBody.headers!)
   return googleSpreadSheet ? sheetService.update(storeId, id, reqBody) : handler.globalError(event)
 }))
