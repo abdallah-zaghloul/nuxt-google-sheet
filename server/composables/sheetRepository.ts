@@ -1,5 +1,5 @@
 import { Sheet as PrismaSheet } from "@prisma/client"
-import { Sheet, GoogleSpreadSheet, PaginationQuery, SheetUpdate } from "../utils/types"
+import { Sheet, GoogleSpreadSheet, PaginationQuery, SheetUpdate, SyncableSheet } from "../utils/types"
 
 const getter = (sheet: PrismaSheet): Sheet => sheet as Sheet
 
@@ -46,5 +46,18 @@ export default {
     data: data
   }).then(
     (sheet: PrismaSheet) => getter(sheet)
-  )
+  ),
+
+  getSyncables: (storeId: string): //@ts-ignore
+    Promise<SyncableSheet[]> => prisma.sheet.findMany({
+      where: {
+        storeId: storeId,
+        status: true
+      },
+      select: {
+        id: true,
+        googleId: true,
+        headers: true
+      }
+    })
 }

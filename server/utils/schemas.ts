@@ -1,13 +1,9 @@
 import { z } from "zod"
-import { Headers, OrderId } from "./types"
+import { Headers, OrderId, Sheet } from "./types"
 
 const orderId: OrderId = "Order ID"
 export const allowedHeaders: Headers = [
     orderId,
-    "SKU",
-    "Vendor",
-    "Total tax",
-    "Order date",
     "First name",
     "Last name",
     "Full name",
@@ -24,21 +20,26 @@ export const allowedHeaders: Headers = [
     "Address 1",
     "Address 2",
     "Full address",
+    "Total tax",
+    "Order date",
     "Total charge",
-    "Total coupon",
     "Total shipping fees",
     "Payment status",
     "Total discount",
     "Total quantity",
-    "Payment gateway",
     "Shipping status",
     "Tracking number",
+    "Variant price",
+    "Order customer currency",
+    "Total with customer currency",
+    //missing
+    "SKU",
+    "Vendor",
+    "Total coupon",
+    "Payment gateway",
     "Product name",
     "Product URL",
     "Product variant",
-    "Variant price",
-    "Order customer currency",
-    "Total with customer currency"
 ]
 
 const headersSchema = z.array(
@@ -71,11 +72,17 @@ export const sheetCreateSchema = z.object({
     headers: headersSchema,
 })
 
-export const sheetUpdateSchema = z.object({
+export const sheetUpdateSchema = (sheet: Sheet) => z.object({
     title: z.string().min(1).max(191).optional(),
     headers: headersSchema.optional(),
     status: z.boolean().optional()
 }).refine(
     data => Object.keys(data).length > 0, {
     message: `at least one input required`,
-})
+}).transform(
+    data => ({
+        title: data.title ?? sheet.title,
+        headers: data.headers ? sheet.headers.concat(data.headers.filter(header => !sheet.headers.includes(header))) : sheet.headers,
+        status: data.status ?? sheet.status,
+    })
+)

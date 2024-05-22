@@ -1,5 +1,6 @@
 import { google, sheets_v4 } from "googleapis"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, Sheet } from "../utils/types"
+import { GaxiosResponse, GaxiosPromise } from "gaxios"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
 
 export default class googleService {
 
@@ -10,6 +11,8 @@ export default class googleService {
   private accessType: string
   private prompt: string
   private valueInputOption: string
+  private range: string
+  private mainSheetTitle: string
   private userInfoUrl: string
   private updateableFields: { title: string, custom: string }
   //services
@@ -26,8 +29,10 @@ export default class googleService {
     //google static options
     this.accessType = 'offline'
     this.prompt = 'consent'
-    this.valueInputOption = 'USER_ENTERED'
+    this.mainSheetTitle = 'Youcan-Orders'
     this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
+    this.valueInputOption = 'USER_ENTERED',
+      this.range = `${this.mainSheetTitle}!A1:Z1`
     this.updateableFields = {
       title: 'title',
       custom: 'userEnteredValue'
@@ -52,9 +57,13 @@ export default class googleService {
     this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
   }
 
+
+
   public getClient(): Client {
     return this.client
   }
+
+
 
   public getAuthUrl() {
     return this.client.generateAuthUrl({
@@ -65,6 +74,8 @@ export default class googleService {
     })
   }
 
+
+
   public authTokensByCode(code: string): Promise<Credentials | null> {
     return this.client.getToken(code).then(
       onfulfilled => this.setClientCredentials(onfulfilled.tokens),
@@ -72,100 +83,14 @@ export default class googleService {
     )
   }
 
+
+
   public setClientCredentials(credentials: Credentials) {
     this.client.setCredentials(credentials)
     return credentials
   }
 
-  public createSpreadSheet(title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
-    return this.spreadSheetService.create({
-      requestBody: {
-        properties: { title }
-      }
-    }).then(({ data }) => this.spreadSheetService.values.update({
-      spreadsheetId: data.spreadsheetId!,
-      range: this.getSheetRange(data.sheets?.[0].properties?.title!, headers),
-      valueInputOption: this.valueInputOption,
-      requestBody: { values: [headers] }
-    }).then(
-      onfulfilled => this.spreadSheetGetter(title, headers, data.spreadsheetId!, data.spreadsheetUrl!),
-      onrejected => null
-    ))
-  }
 
-  public async batchUpdateSpreadSheet(sheet: Sheet, title?: string, headers?: Headers): Promise<GoogleSpreadSheet | null> {
-
-    title ??= sheet.title
-    headers ??= sheet.headers
-
-    return this.spreadSheetService.batchUpdate({
-      spreadsheetId: sheet.googleId,
-      requestBody: {
-        requests: [
-          this.getUpdateSpreadSheetTitleRequest(title),
-          ...(await this.getUpdateSheetsHeadersRequests(sheet.googleId, headers))!
-        ],
-      },
-    }).then(
-      onfulfilled => this.spreadSheetGetter(title, headers, sheet.googleId, sheet.googleUrl),
-      onrejected => null
-    )
-  }
-
-  private spreadSheetGetter(title: string, headers: Headers, spreadSheetId: string, spreadSheetUrl: string): GoogleSpreadSheet {
-    return {
-      title: title,
-      headers: headers,
-      googleId: spreadSheetId,
-      googleUrl: spreadSheetUrl
-    }
-  }
-
-  private getSheets(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet[]> {
-    return this.spreadSheetService.get({
-      spreadsheetId: spreadSheetId
-    }).then(
-      ({ data: spreadSheet }) => spreadSheet.sheets!
-    )
-  }
-
-  private getUpdateSpreadSheetTitleRequest(title: string): sheets_v4.Schema$Request {
-    return {
-      updateSpreadsheetProperties: {
-        properties: {
-          title: title,
-        },
-        fields: this.updateableFields.title,
-      },
-    }
-  }
-
-  private getUpdateSheetsHeadersRequests(spreadSheetId: string, headers: Headers): Promise<sheets_v4.Schema$Request[]> {
-    return this.getSheets(spreadSheetId).then(sheets => sheets?.map(sheet => ({
-      updateCells: {
-        rows: [
-          {
-            values: headers.map((header) => ({
-              userEnteredValue: { stringValue: header }
-            })),
-          }
-        ],
-        fields: this.updateableFields.custom,
-        start: {
-          sheetId: sheet.properties?.sheetId,
-          rowIndex: 0, // Assuming headers are in the first row
-          columnIndex: 0
-        }
-      }
-    }))!)
-  }
-
-  public getSheetRange(sheetTitle: string, headers: Headers) {
-    const unicodeOfFirstCellChar_A = 65
-    const orderOfLastCellChar = headers.length - 1
-    const lastCellCharByUnicode = String.fromCharCode(unicodeOfFirstCellChar_A + orderOfLastCellChar)
-    return `${sheetTitle}!A1:${lastCellCharByUnicode}1`
-  }
 
   public getProfile(): Promise<UserProfileInfo | null> {
     return this.client.request({
@@ -176,7 +101,258 @@ export default class googleService {
     )
   }
 
+
+
   public getEmail(): Promise<string | null> {
     return this.getProfile().then(profile => profile?.email || null)
+  }
+
+
+  //spreadSheet RequestPayloads
+  private spreadSheetReq(): {
+    createSpreadSheet: (title: string, headers: Headers) => sheets_v4.Schema$Spreadsheet,
+    updateSpreadSheetTitle: (title: string) => sheets_v4.Schema$Request,
+    updateMainSheetHeaders: (spreadSheetId: string, headers: Headers) => Promise<sheets_v4.Schema$Request>
+    addMainSheet: () => sheets_v4.Schema$Request
+  } {
+    return {
+      //create spread sheet request payload
+      createSpreadSheet: (title: string, headers: Headers) => ({
+        properties: { title: title },
+        sheets: [
+          //1st sheet of spreadSheetFile
+          {
+            properties: {
+              title: this.mainSheetTitle,
+            },
+            data: [{ rowData: [{ values: this.headerRowValues(headers) }] }]
+          }
+        ]
+      }),
+
+      //update spread sheet title request payload
+      updateSpreadSheetTitle: (title: string) => ({
+        updateSpreadsheetProperties: {
+          properties: {
+            title: title,
+          },
+          fields: this.updateableFields.title,
+        }
+      }),
+
+      //update main sheet headers request payload
+      updateMainSheetHeaders: async (spreadSheetId: string, headers: Headers) => ({
+        updateCells: {
+          rows: [{ values: this.headerRowValues(headers) }],
+          fields: this.updateableFields.custom,
+          start: {
+            sheetId: await this.getMainSheetId(spreadSheetId),
+            rowIndex: 0, // Assuming headers are in the first row
+            columnIndex: 0
+          }
+        }
+      }),
+
+      //add main sheet request payload
+      addMainSheet: () => ({
+        addSheet: {
+          properties: {
+            title: this.mainSheetTitle,
+          },
+        },
+      }),
+    }
+  }
+
+
+
+  public createSpreadSheet(title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
+    return this.spreadSheetService.create({
+      requestBody: this.spreadSheetReq().createSpreadSheet(title, headers)
+    }).then(
+      res => this.spreadSheetGetter({
+        res: res,
+        title: title,
+        headers: headers,
+        googleId: res.data.spreadsheetId!,
+        googleUrl: res.data.spreadsheetUrl!
+      })
+    )
+  }
+
+
+
+  public async updateSpreadSheet(spreadSheetId: string, title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
+    return this.batchUpdateSpreadSheet(
+      spreadSheetId,
+      this.spreadSheetReq().updateSpreadSheetTitle(title),
+      await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
+    ).then(
+      res => this.spreadSheetGetter({
+        res: res,
+        title: title,
+        headers: headers,
+        googleId: res.data.updatedSpreadsheet?.spreadsheetId!,
+        googleUrl: res.data.updatedSpreadsheet?.spreadsheetUrl!
+      }),
+    )
+  }
+
+
+  public appendOrderToSheet(spreadSheetId: string, orderEvent: CreateOrderEvent, headers: Headers)
+    : GaxiosPromise<sheets_v4.Schema$AppendValuesResponse> {
+
+    const appendRowToSheet = () => this.spreadSheetService.values.append({
+      spreadsheetId: spreadSheetId,
+      range: this.range,
+      valueInputOption: this.valueInputOption,
+      requestBody: {
+        values: [this.orderEventToSheetRow(orderEvent, headers)]
+      }
+    })
+
+    return this.getOrSetMainSheet(spreadSheetId).then(
+      async ({ hasOldMainSheet }) => hasOldMainSheet ? appendRowToSheet() : this.batchUpdateSpreadSheet(
+        spreadSheetId,
+        await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
+      ).then(() => appendRowToSheet())
+    )
+  }
+
+
+
+  private spreadSheetGetter({ res, title, headers, googleId, googleUrl }: {
+    res: GaxiosResponse,
+    title: string,
+    headers: Headers,
+    googleId: string,
+    googleUrl: string
+  }): GoogleSpreadSheet | null {
+
+    if (check((res.status >= 200 && res.status < 300), res))
+      return {
+        title: title,
+        headers: headers,
+        googleId: googleId,
+        googleUrl: googleUrl
+      }
+
+    return null
+  }
+
+
+
+  private getSheets(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet[]> {
+    return this.spreadSheetService.get({
+      spreadsheetId: spreadSheetId
+    }).then(
+      ({ data: spreadSheet }) => spreadSheet.sheets!
+    )
+  }
+
+
+
+  private headerRowValues(headers: Headers): sheets_v4.Schema$CellData[] {
+    return headers.map(header => ({ userEnteredValue: { stringValue: header } }))
+  }
+
+
+
+  private async getOrSetMainSheet(spreadSheetId: string): Promise<{ mainSheet: sheets_v4.Schema$Sheet, hasOldMainSheet: boolean }> {
+
+    const findMainSheet = (sheets: sheets_v4.Schema$Sheet[]) => sheets.find(
+      (sheet) => sheet.properties?.title === this.mainSheetTitle
+    )!
+
+    let mainSheet = await this.getSheets(spreadSheetId).then(sheets => findMainSheet(sheets))
+    const hasOldMainSheet = mainSheet ? true : false
+
+    mainSheet ??= await this.batchUpdateSpreadSheet(spreadSheetId, this.spreadSheetReq().addMainSheet()).then(
+      ({ data }) => findMainSheet(data.updatedSpreadsheet?.sheets!)
+    )
+
+    return {
+      mainSheet,
+      hasOldMainSheet
+    }
+  }
+
+
+
+  private getMainSheetId(spreadSheetId: string): Promise<number | null | undefined> {
+    return this.getOrSetMainSheet(spreadSheetId).then(({ mainSheet }) => mainSheet.properties?.sheetId)
+  }
+
+
+
+  private batchUpdateSpreadSheet(spreadSheetId: string, ...requests: sheets_v4.Schema$Request[])
+    : GaxiosPromise<sheets_v4.Schema$BatchUpdateSpreadsheetResponse> {
+    return this.spreadSheetService.batchUpdate({
+      spreadsheetId: spreadSheetId,
+      requestBody: {
+        //saves another request "returns updated spreadSheet object at response"
+        includeSpreadsheetInResponse: true,
+        requests: requests,
+      },
+    })
+  }
+
+
+
+  private orderEventToSheetRow(orderEvent: CreateOrderEvent, headers: Headers): (string | number | null | undefined)[] {
+
+    const order = {
+      "Order ID": orderEvent?.ref,
+      "First name": orderEvent?.customer?.first_name,
+      "Last name": orderEvent?.customer?.last_name,
+      "Full name": orderEvent?.customer?.full_name,
+      "Email": orderEvent?.customer?.email,
+      "Phone": orderEvent?.customer?.phone,
+      "Country": orderEvent?.customer?.country,
+      "Region": orderEvent?.customer?.region,
+      "City": orderEvent?.customer?.city,
+      "Address city": orderEvent?.shipping?.address?.city,
+      "Address state": orderEvent?.shipping?.address?.state,
+      "Address country": orderEvent?.shipping?.address?.country_name,
+      "Address currency": orderEvent?.customer_currency?.code,
+      "Address zip code": orderEvent?.shipping?.address?.zip_code,
+      "Address 1": orderEvent?.shipping?.address?.first_line,
+      "Address 2": orderEvent?.shipping?.address?.second_line,
+
+      "Full address": [
+        orderEvent?.shipping?.address?.country_name,
+        orderEvent?.shipping?.address?.state,
+        orderEvent?.shipping?.address?.city,
+        orderEvent?.shipping?.address?.region,
+        orderEvent?.shipping?.address?.company,
+        orderEvent?.shipping?.address?.first_line,
+        orderEvent?.shipping?.address?.second_line,
+        orderEvent?.shipping?.address?.zip_code
+      ].join(','),
+
+      "Total tax": orderEvent?.vat,
+      "Order date": orderEvent?.created_at,
+      "Total charge": orderEvent?.total,
+      "Total shipping fees": orderEvent?.shipping?.price,
+      "Payment status": orderEvent?.payment?.status,
+      "Total discount": orderEvent?.discount?.value,
+      "Total quantity": getNestedProp(orderEvent?.variants, 'quantity'),
+      "Shipping status": orderEvent?.shipping?.status,
+      "Tracking number": orderEvent?.shipping?.tracking_number,
+      "Variant price": getNestedProp(orderEvent?.variants, 'price'),
+      "Order customer currency": orderEvent?.customer_currency?.code,
+      "Total with customer currency": orderEvent?.customer_currency?.major_value,
+
+      //missing
+      "SKU": getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
+      "Vendor": getNestedProp(orderEvent?.variants, 'vendor'),
+      "Total coupon": getNestedProp(orderEvent?.variants, 'total_coupon'),
+      "Payment gateway": getNestedProp(orderEvent?.variants, 'payment_gateway'),
+      "Product name": getNestedProp(orderEvent?.variants, 'product_name'),
+      "Product URL": getNestedProp(orderEvent?.variants, 'product_url'),
+      "Product variant": getNestedProp(orderEvent?.variants, 'product_variant'),
+    }
+
+    return headers.map(header => order?.[header])
   }
 }
