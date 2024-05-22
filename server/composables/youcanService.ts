@@ -49,7 +49,7 @@ export default class youcanService {
         'Content-Type': 'application/json',
       },
     }).then(
-      res => check(res.ok, res) ? res.json() : null
+      res => helper.check(res.ok, res) ? res.json() : null
     )
   }
 
@@ -65,8 +65,8 @@ export default class youcanService {
   private batchUnSubscribe(subs: YouCanWebhookSubs): Promise<boolean> {
     const unsubs = Promise.allSettled(subs.map(sub => this.unSubscribe(sub.id)))
     return unsubs.then(
-      res => check(true, res),
-      err => check(false, err)
+      res => helper.check(true, res),
+      err => helper.check(false, err)
     )
   }
 

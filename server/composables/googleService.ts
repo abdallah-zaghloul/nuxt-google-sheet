@@ -229,7 +229,7 @@ export default class googleService {
     googleUrl: string
   }): GoogleSpreadSheet | null {
 
-    if (check((res.status >= 200 && res.status < 300), res))
+    if (helper.check((res.status >= 200 && res.status < 300), res))
       return {
         title: title,
         headers: headers,
@@ -336,21 +336,21 @@ export default class googleService {
       "Total shipping fees": orderEvent?.shipping?.price,
       "Payment status": orderEvent?.payment?.status,
       "Total discount": orderEvent?.discount?.value,
-      "Total quantity": getNestedProp(orderEvent?.variants, 'quantity'),
+      "Total quantity": helper.getNestedProp(orderEvent?.variants, 'quantity'),
       "Shipping status": orderEvent?.shipping?.status,
       "Tracking number": orderEvent?.shipping?.tracking_number,
-      "Variant price": getNestedProp(orderEvent?.variants, 'price'),
+      "Variant price": helper.getNestedProp(orderEvent?.variants, 'price'),
       "Order customer currency": orderEvent?.customer_currency?.code,
       "Total with customer currency": orderEvent?.customer_currency?.major_value,
 
       //missing
-      "SKU": getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
-      "Vendor": getNestedProp(orderEvent?.variants, 'vendor'),
-      "Total coupon": getNestedProp(orderEvent?.variants, 'total_coupon'),
-      "Payment gateway": getNestedProp(orderEvent?.variants, 'payment_gateway'),
-      "Product name": getNestedProp(orderEvent?.variants, 'product_name'),
-      "Product URL": getNestedProp(orderEvent?.variants, 'product_url'),
-      "Product variant": getNestedProp(orderEvent?.variants, 'product_variant'),
+      "SKU": helper.getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
+      "Vendor": helper.getNestedProp(orderEvent?.variants, 'vendor'),
+      "Total coupon": helper.getNestedProp(orderEvent?.variants, 'total_coupon'),
+      "Payment gateway": helper.getNestedProp(orderEvent?.variants, 'payment_gateway'),
+      "Product name": helper.getNestedProp(orderEvent?.variants, 'product_name'),
+      "Product URL": helper.getNestedProp(orderEvent?.variants, 'product_url'),
+      "Product variant": helper.getNestedProp(orderEvent?.variants, 'product_variant'),
     }
 
     return headers.map(header => order?.[header])
