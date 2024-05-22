@@ -11,8 +11,8 @@ export default class googleService {
   private accessType: string
   private prompt: string
   private valueInputOption: string
-  private range: string
   private mainSheetTitle: string
+  private mainSheetRange: string
   private userInfoUrl: string
   private updateableFields: { title: string, custom: string }
   //services
@@ -31,8 +31,8 @@ export default class googleService {
     this.prompt = 'consent'
     this.mainSheetTitle = 'Youcan-Orders'
     this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
-    this.valueInputOption = 'USER_ENTERED',
-      this.range = `${this.mainSheetTitle}!A1:Z1`
+    this.valueInputOption = 'USER_ENTERED'
+    this.mainSheetRange = `${this.mainSheetTitle}!A1:Z1`
     this.updateableFields = {
       title: 'title',
       custom: 'userEnteredValue'
@@ -204,7 +204,7 @@ export default class googleService {
 
     const appendRowToSheet = () => this.spreadSheetService.values.append({
       spreadsheetId: spreadSheetId,
-      range: this.range,
+      range: this.mainSheetRange,
       valueInputOption: this.valueInputOption,
       requestBody: {
         values: [this.orderEventToSheetRow(orderEvent, headers)]
