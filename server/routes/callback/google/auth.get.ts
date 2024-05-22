@@ -1,5 +1,5 @@
-import googleService from "../../composables/googleService"
-import settingService from "../../composables/settingService"
+import googleService from "../../../composables/googleService"
+import settingService from "../../../composables/settingService"
 
 
 export default defineEventHandler((event) => handler.async(event, async () => {
