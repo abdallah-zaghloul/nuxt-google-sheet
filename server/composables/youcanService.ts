@@ -71,11 +71,15 @@ export default class youcanService {
   }
 
 
-  public async unSubscribeCreateOrderSubs(): Promise<boolean> {
-    const orderCreateSubs = await this.listSubscriptions().then(
+  public async unSubscribeCreatedOrderSubs(): Promise<boolean> {
+    const createdOrderSubs = await this.listCreatedOrderSubs()
+    return this.batchUnSubscribe(createdOrderSubs)
+  }
+
+  public async listCreatedOrderSubs() {
+    return await this.listSubscriptions().then(
       subs => subs.filter(sub => (sub.event === this.events.orderCreate))
     )
-    return this.batchUnSubscribe(orderCreateSubs)
   }
 
   private subscribe(reqBody: YouCanWebhookSub): Promise<{ id: string }> {
