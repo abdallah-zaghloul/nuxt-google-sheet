@@ -11,10 +11,10 @@ export default class googleService {
   private accessType: string
   private prompt: string
   private valueInputOption: string
-  private range: string
   private mainSheetTitle: string
+  private mainSheetRange: string
   private userInfoUrl: string
-  private updateableFields: { title: string, custom: string }
+  private updateFields: { title: string, custom: string }
   //services
   private spreadSheetService: sheets_v4.Resource$Spreadsheets
 
@@ -31,9 +31,9 @@ export default class googleService {
     this.prompt = 'consent'
     this.mainSheetTitle = 'Youcan-Orders'
     this.userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo'
-    this.valueInputOption = 'USER_ENTERED',
-      this.range = `${this.mainSheetTitle}!A1:Z1`
-    this.updateableFields = {
+    this.valueInputOption = 'USER_ENTERED'
+    this.mainSheetRange = `${this.mainSheetTitle}!A1:Z1`
+    this.updateFields = {
       title: 'title',
       custom: 'userEnteredValue'
     }
@@ -136,7 +136,7 @@ export default class googleService {
           properties: {
             title: title,
           },
-          fields: this.updateableFields.title,
+          fields: this.updateFields.title,
         }
       }),
 
@@ -144,7 +144,7 @@ export default class googleService {
       updateMainSheetHeaders: async (spreadSheetId: string, headers: Headers) => ({
         updateCells: {
           rows: [{ values: this.headerRowValues(headers) }],
-          fields: this.updateableFields.custom,
+          fields: this.updateFields.custom,
           start: {
             sheetId: await this.getMainSheetId(spreadSheetId),
             rowIndex: 0, // Assuming headers are in the first row
@@ -204,7 +204,7 @@ export default class googleService {
 
     const appendRowToSheet = () => this.spreadSheetService.values.append({
       spreadsheetId: spreadSheetId,
-      range: this.range,
+      range: this.mainSheetRange,
       valueInputOption: this.valueInputOption,
       requestBody: {
         values: [this.orderEventToSheetRow(orderEvent, headers)]
@@ -229,7 +229,7 @@ export default class googleService {
     googleUrl: string
   }): GoogleSpreadSheet | null {
 
-    if (check((res.status >= 200 && res.status < 300), res))
+    if (helper.check((res.status >= 200 && res.status < 300), res))
       return {
         title: title,
         headers: headers,
@@ -336,21 +336,21 @@ export default class googleService {
       "Total shipping fees": orderEvent?.shipping?.price,
       "Payment status": orderEvent?.payment?.status,
       "Total discount": orderEvent?.discount?.value,
-      "Total quantity": getNestedProp(orderEvent?.variants, 'quantity'),
+      "Total quantity": helper.getNestedProp(orderEvent?.variants, 'quantity'),
       "Shipping status": orderEvent?.shipping?.status,
       "Tracking number": orderEvent?.shipping?.tracking_number,
-      "Variant price": getNestedProp(orderEvent?.variants, 'price'),
+      "Variant price": helper.getNestedProp(orderEvent?.variants, 'price'),
       "Order customer currency": orderEvent?.customer_currency?.code,
       "Total with customer currency": orderEvent?.customer_currency?.major_value,
 
       //missing
-      "SKU": getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
-      "Vendor": getNestedProp(orderEvent?.variants, 'vendor'),
-      "Total coupon": getNestedProp(orderEvent?.variants, 'total_coupon'),
-      "Payment gateway": getNestedProp(orderEvent?.variants, 'payment_gateway'),
-      "Product name": getNestedProp(orderEvent?.variants, 'product_name'),
-      "Product URL": getNestedProp(orderEvent?.variants, 'product_url'),
-      "Product variant": getNestedProp(orderEvent?.variants, 'product_variant'),
+      "SKU": helper.getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
+      "Vendor": helper.getNestedProp(orderEvent?.variants, 'vendor'),
+      "Total coupon": helper.getNestedProp(orderEvent?.variants, 'total_coupon'),
+      "Payment gateway": helper.getNestedProp(orderEvent?.variants, 'payment_gateway'),
+      "Product name": helper.getNestedProp(orderEvent?.variants, 'product_name'),
+      "Product URL": helper.getNestedProp(orderEvent?.variants, 'product_url'),
+      "Product variant": helper.getNestedProp(orderEvent?.variants, 'product_variant'),
     }
 
     return headers.map(header => order?.[header])
