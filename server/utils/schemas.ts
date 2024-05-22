@@ -4,10 +4,6 @@ import { Headers, OrderId, Sheet } from "./types"
 const orderId: OrderId = "Order ID"
 const allowedHeaders: Headers = [
     orderId,
-    "SKU",
-    "Vendor",
-    "Total tax",
-    "Order date",
     "First name",
     "Last name",
     "Full name",
@@ -24,21 +20,26 @@ const allowedHeaders: Headers = [
     "Address 1",
     "Address 2",
     "Full address",
+    "Total tax",
+    "Order date",
     "Total charge",
-    "Total coupon",
     "Total shipping fees",
     "Payment status",
     "Total discount",
     "Total quantity",
-    "Payment gateway",
     "Shipping status",
     "Tracking number",
+    "Variant price",
+    "Order customer currency",
+    "Total with customer currency",
+    //missing
+    "SKU",
+    "Vendor",
+    "Total coupon",
+    "Payment gateway",
     "Product name",
     "Product URL",
     "Product variant",
-    "Variant price",
-    "Order customer currency",
-    "Total with customer currency"
 ]
 
 const headersSchema = z.array(

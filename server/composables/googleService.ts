@@ -1,5 +1,5 @@
 import { google, sheets_v4 } from "googleapis"
-import { GaxiosResponse } from "gaxios"
+import { GaxiosResponse, GaxiosPromise } from "gaxios"
 import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
 
 export default class googleService {
@@ -109,7 +109,12 @@ export default class googleService {
 
 
   //spreadSheet RequestPayloads
-  private spreadSheetReq() {
+  private spreadSheetReq(): {
+    createSpreadSheet: (title: string, headers: Headers) => sheets_v4.Schema$Spreadsheet,
+    updateSpreadSheetTitle: (title: string) => sheets_v4.Schema$Request,
+    updateMainSheetHeaders: (spreadSheetId: string, headers: Headers) => Promise<sheets_v4.Schema$Request>
+    addMainSheet: () => sheets_v4.Schema$Request
+  } {
     return {
       //create spread sheet request payload
       createSpreadSheet: (title: string, headers: Headers) => ({
@@ -178,17 +183,11 @@ export default class googleService {
 
 
   public async updateSpreadSheet(spreadSheetId: string, title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
-    return this.spreadSheetService.batchUpdate({
-      spreadsheetId: spreadSheetId,
-      requestBody: {
-        //saves another request "returns updated spreadSheet object at response"
-        includeSpreadsheetInResponse: true,
-        requests: [
-          this.spreadSheetReq().updateSpreadSheetTitle(title),
-          await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
-        ],
-      },
-    }).then(
+    return this.batchUpdateSpreadSheet(
+      spreadSheetId,
+      this.spreadSheetReq().updateSpreadSheetTitle(title),
+      await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
+    ).then(
       res => this.spreadSheetGetter({
         res: res,
         title: title,
@@ -200,8 +199,10 @@ export default class googleService {
   }
 
 
-  public appendOrderToSheet(spreadSheetId: string, orderEvent: CreateOrderEvent, headers: Headers) {
-    return this.spreadSheetService.values.append({
+  public appendOrderToSheet(spreadSheetId: string, orderEvent: CreateOrderEvent, headers: Headers)
+    : GaxiosPromise<sheets_v4.Schema$AppendValuesResponse> {
+
+    const appendRowToSheet = () => this.spreadSheetService.values.append({
       spreadsheetId: spreadSheetId,
       range: this.range,
       valueInputOption: this.valueInputOption,
@@ -209,6 +210,13 @@ export default class googleService {
         values: [this.orderEventToSheetRow(orderEvent, headers)]
       }
     })
+
+    return this.getOrSetMainSheet(spreadSheetId).then(
+      async ({ hasOldMainSheet }) => hasOldMainSheet ? appendRowToSheet() : this.batchUpdateSpreadSheet(
+        spreadSheetId,
+        await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
+      ).then(() => appendRowToSheet())
+    )
   }
 
 
@@ -250,75 +258,99 @@ export default class googleService {
 
 
 
-  private async getMainSheet(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet> {
+  private async getOrSetMainSheet(spreadSheetId: string): Promise<{ mainSheet: sheets_v4.Schema$Sheet, hasOldMainSheet: boolean }> {
 
-    const findMainSheet = (sheets: sheets_v4.Schema$Sheet[]) => sheets.find((sheet) => sheet.properties?.title === this.mainSheetTitle)!
-    const mainSheet = this.getSheets(spreadSheetId).then(sheets => findMainSheet(sheets))
+    const findMainSheet = (sheets: sheets_v4.Schema$Sheet[]) => sheets.find(
+      (sheet) => sheet.properties?.title === this.mainSheetTitle
+    )!
 
-    return await mainSheet ?? this.spreadSheetService.batchUpdate({
+    let mainSheet = await this.getSheets(spreadSheetId).then(sheets => findMainSheet(sheets))
+    const hasOldMainSheet = mainSheet ? true : false
+
+    mainSheet ??= await this.batchUpdateSpreadSheet(spreadSheetId, this.spreadSheetReq().addMainSheet()).then(
+      ({ data }) => findMainSheet(data.updatedSpreadsheet?.sheets!)
+    )
+
+    return {
+      mainSheet,
+      hasOldMainSheet
+    }
+  }
+
+
+
+  private getMainSheetId(spreadSheetId: string): Promise<number | null | undefined> {
+    return this.getOrSetMainSheet(spreadSheetId).then(({ mainSheet }) => mainSheet.properties?.sheetId)
+  }
+
+
+
+  private batchUpdateSpreadSheet(spreadSheetId: string, ...requests: sheets_v4.Schema$Request[])
+    : GaxiosPromise<sheets_v4.Schema$BatchUpdateSpreadsheetResponse> {
+    return this.spreadSheetService.batchUpdate({
       spreadsheetId: spreadSheetId,
       requestBody: {
         //saves another request "returns updated spreadSheet object at response"
         includeSpreadsheetInResponse: true,
-        requests: [
-          this.spreadSheetReq().addMainSheet()
-        ]
-      }
-    }).then(
-      ({ data }) => findMainSheet(data.updatedSpreadsheet?.sheets!)
-    )
+        requests: requests,
+      },
+    })
   }
 
 
 
-  private getMainSheetId(spreadSheetId: string) {
-    return this.getMainSheet(spreadSheetId).then(mainSheet => mainSheet.properties?.sheetId)
-  }
-
-
-
-  public orderEventToSheetRow(orderEvent: CreateOrderEvent, headers: Headers): (string | number | null | undefined)[] {
+  private orderEventToSheetRow(orderEvent: CreateOrderEvent, headers: Headers): (string | number | null | undefined)[] {
 
     const order = {
       "Order ID": orderEvent?.ref,
-      /* customer */
       "First name": orderEvent?.customer?.first_name,
       "Last name": orderEvent?.customer?.last_name,
       "Full name": orderEvent?.customer?.full_name,
       "Email": orderEvent?.customer?.email,
       "Phone": orderEvent?.customer?.phone,
       "Country": orderEvent?.customer?.country,
-      // "Region": orderEvent?.customer?,
+      "Region": orderEvent?.customer?.region,
       "City": orderEvent?.customer?.city,
-      // "Address city": orderEvent?.customer?.address,
-      // "Address state": orderEvent?.customer?.address,
-      // "Address country": orderEvent?.customer?.address,
-      // "Address currency": orderEvent?.customer?.address,
-      // "Address zip code": orderEvent?.customer?.address,
-      // "Address 1": orderEvent?.customer?.address,
-      // "Address 2": orderEvent?.customer?.address,
-      // "Full address": orderEvent?.customer?.address,
+      "Address city": orderEvent?.shipping?.address?.city,
+      "Address state": orderEvent?.shipping?.address?.state,
+      "Address country": orderEvent?.shipping?.address?.country_name,
+      "Address currency": orderEvent?.customer_currency?.code,
+      "Address zip code": orderEvent?.shipping?.address?.zip_code,
+      "Address 1": orderEvent?.shipping?.address?.first_line,
+      "Address 2": orderEvent?.shipping?.address?.second_line,
 
-      /* order */
-      //  "SKU": orderEvent? /* Stock Keeping Unit */
-      //  "Vendor": orderEvent?,
-      //  "Total tax": orderEvent?,
+      "Full address": [
+        orderEvent?.shipping?.address?.country_name,
+        orderEvent?.shipping?.address?.state,
+        orderEvent?.shipping?.address?.city,
+        orderEvent?.shipping?.address?.region,
+        orderEvent?.shipping?.address?.company,
+        orderEvent?.shipping?.address?.first_line,
+        orderEvent?.shipping?.address?.second_line,
+        orderEvent?.shipping?.address?.zip_code
+      ].join(','),
+
+      "Total tax": orderEvent?.vat,
       "Order date": orderEvent?.created_at,
-      //  "Total charge": orderEvent?,
-      //  "Total coupon": orderEvent?,
+      "Total charge": orderEvent?.total,
       "Total shipping fees": orderEvent?.shipping?.price,
       "Payment status": orderEvent?.payment?.status,
       "Total discount": orderEvent?.discount?.value,
-      //  "Total quantity": orderEvent?,
-      //  "Payment gateway": orderEvent?.payment?
+      "Total quantity": getNestedProp(orderEvent?.variants, 'quantity'),
       "Shipping status": orderEvent?.shipping?.status,
       "Tracking number": orderEvent?.shipping?.tracking_number,
-      //  "Product name": orderEvent?,
-      //  "Product URL": orderEvent?,
-      //  "Product variant": orderEvent?.variants?,
-      //  "Variant price": orderEvent?.variants?,
+      "Variant price": getNestedProp(orderEvent?.variants, 'price'),
       "Order customer currency": orderEvent?.customer_currency?.code,
-      "Total with customer currency": orderEvent?.total
+      "Total with customer currency": orderEvent?.customer_currency?.major_value,
+
+      //missing
+      "SKU": getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
+      "Vendor": getNestedProp(orderEvent?.variants, 'vendor'),
+      "Total coupon": getNestedProp(orderEvent?.variants, 'total_coupon'),
+      "Payment gateway": getNestedProp(orderEvent?.variants, 'payment_gateway'),
+      "Product name": getNestedProp(orderEvent?.variants, 'product_name'),
+      "Product URL": getNestedProp(orderEvent?.variants, 'product_url'),
+      "Product variant": getNestedProp(orderEvent?.variants, 'product_variant'),
     }
 
     return headers.map(header => order?.[header])
