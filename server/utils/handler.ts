@@ -18,7 +18,7 @@ const sendAnError = ({
     data
   })
   sendError(event, error)
-  return error
+  throw error
 }
 
 const sendResponse = (data?: any) => ({
@@ -41,10 +41,16 @@ export default {
     data: data
   }),
 
-  notFoundError:(event: H3Event) => sendAnError({
+  notFoundError: (event: H3Event) => sendAnError({
     event: event,
     statusCode: 404,
     statusMessage: 'Not found'
+  }),
+
+  unAuthorizedError: (event: H3Event, message = "unAuthorized") => sendAnError({
+    event: event,
+    statusCode: 401,
+    statusMessage: message
   }),
 
   sync: (event: H3Event, fn: Function, catcher?: Function) => {
@@ -62,7 +68,7 @@ export default {
   sendError: sendAnError,
 
   sendResponse: sendResponse,
-  
+
   globalError: globalError,
 
 }

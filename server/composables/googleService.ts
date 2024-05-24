@@ -50,17 +50,12 @@ export default class googleService {
       clientSecret: this.setting.clientSecret,
       redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
     }))
+
     // set Client Credentials from setting
-    this.setting.credentials && this.setClientCredentials(this.setting.credentials)
+    this.setClientCredentials(this.setting.credentials)
 
     //init google sheet service for auth client
     this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
-  }
-
-
-
-  public getClient(): Client {
-    return this.client
   }
 
 
@@ -85,9 +80,17 @@ export default class googleService {
 
 
 
-  public setClientCredentials(credentials: Credentials) {
-    this.client.setCredentials(credentials)
-    return credentials
+  private setClientCredentials(credentials?: Credentials | null) {
+    return handler.sync(
+      useEvent(),
+      () => {
+        if (!credentials)
+          return handler.unAuthorizedError(useEvent(), 'Please reconnect your google credentials')
+
+        this.client.setCredentials(credentials!)
+        return credentials!
+      }
+    )
   }
 
 
