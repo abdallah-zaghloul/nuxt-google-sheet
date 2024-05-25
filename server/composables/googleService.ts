@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis"
 import { GaxiosResponse, GaxiosPromise } from "gaxios"
 import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
+import mediatorService from "./mediatorService"
 
 export default class googleService {
 
@@ -84,8 +85,10 @@ export default class googleService {
     return handler.sync(
       useEvent(),
       () => {
-        if (!credentials)
+        if (!credentials) {
+          mediatorService('disconnectSetting', this.setting.storeId)
           return handler.unAuthorizedError(useEvent(), 'Please reconnect your google credentials')
+        }
 
         this.client.setCredentials(credentials!)
         return credentials!
