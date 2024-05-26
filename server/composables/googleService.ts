@@ -83,11 +83,10 @@ export default class googleService {
 
   private setClientCredentials(credentials?: Credentials | null) {
     return handler.sync(
-      useEvent(),
       () => {
         if (!credentials) {
           mediatorService('disconnectSetting', this.setting.storeId)
-          return handler.unAuthorizedError(useEvent(), 'Please reconnect your google credentials')
+          return handler.unAuthorizedError('Please reconnect your google credentials')
         }
 
         this.client.setCredentials(credentials!)

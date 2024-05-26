@@ -3,7 +3,7 @@ import settingService from "../../composables/settingService";
 import googleService from "../../composables/googleService";
 import { settingSchema } from "../../utils/schemas";
 
-export default defineEventHandler((event) => handler.async(event, async () => {
+export default defineEventHandler((event) => handler.async(async () => {
     const storeId = helper.getStoreId()
     const { clientId, clientSecret, isConnected }: SettingReq = await validator.reqBody(settingSchema, event)
 

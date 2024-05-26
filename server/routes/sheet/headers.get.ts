@@ -1,5 +1,5 @@
 import sheetService from "~/server/composables/sheetService"
 
-export default defineEventHandler((event) => handler.sync(event, () => {
+export default defineEventHandler(() => handler.sync(() => {
   return sheetService.getHeaders()
 }))
