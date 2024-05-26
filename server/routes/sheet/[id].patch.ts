@@ -7,7 +7,7 @@ import { SheetUpdate } from "~/server/utils/types"
 
 export default defineEventHandler((event) => handler.async(event, async () => {
   const id = validator.routeParam(uuidSchema, event, 'id')
-  const storeId = helper.getStoreId(event)
+  const storeId = helper.getStoreId()
   const sheet = await sheetService.get(storeId, id)!
   const reqBody: SheetUpdate = await validator.reqBody(sheetUpdateSchema(sheet!), event)
   const setting = await settingService.get(storeId)

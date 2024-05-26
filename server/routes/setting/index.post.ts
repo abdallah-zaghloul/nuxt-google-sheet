@@ -4,7 +4,7 @@ import googleService from "../../composables/googleService";
 import { settingSchema } from "../../utils/schemas";
 
 export default defineEventHandler((event) => handler.async(event, async () => {
-    const storeId = helper.getStoreId(event)
+    const storeId = helper.getStoreId()
     const { clientId, clientSecret, isConnected }: SettingReq = await validator.reqBody(settingSchema, event)
 
     if (isConnected) {

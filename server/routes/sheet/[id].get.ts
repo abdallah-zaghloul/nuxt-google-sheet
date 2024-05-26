@@ -4,5 +4,5 @@ import { uuidSchema } from "~/server/utils/schemas"
 
 export default defineEventHandler((event) => handler.async(event, async () => {
   const id = validator.routeParam(uuidSchema, event, 'id')
-  return await sheetService.get(helper.getStoreId(event), id) ?? handler.notFoundError(event)
+  return await sheetService.get(helper.getStoreId(), id) ?? handler.notFoundError(event)
 }))
