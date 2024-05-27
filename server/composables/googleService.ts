@@ -72,27 +72,26 @@ export default class googleService {
 
 
 
-  public authTokensByCode(code: string): Promise<Credentials | null> {
+  public authTokensByCode(code: string): Promise<Credentials | null | undefined> {
     return this.client.getToken(code).then(
-      onfulfilled => this.setClientCredentials(onfulfilled.tokens),
-      onrejected => null
+      res => this.setClientCredentials(res.tokens, true)
     )
   }
 
 
 
-  private setClientCredentials(credentials?: Credentials | null) {
-    return handler.sync(
-      () => {
-        if (!credentials) {
-          mediatorService('disconnectSetting', this.setting.storeId)
-          return handler.unAuthorizedError('Please reconnect your google credentials')
-        }
+  private async setClientCredentials(credentials?: Credentials | null, setEmail: boolean = false) {
+    if (credentials) {
+      this.client.setCredentials(credentials)
+      this.setting.credentials = credentials
+    }
 
-        this.client.setCredentials(credentials!)
-        return credentials!
-      }
-    )
+    if (setEmail)
+      this.setting.email = await this.getEmail()
+
+    this.setting = await mediatorService('connectSetting', this.setting.storeId, this.setting.credentials!, this.setting.email)
+    return credentials
+
   }
 
 
@@ -108,8 +107,8 @@ export default class googleService {
 
 
 
-  public getEmail(): Promise<string | null> {
-    return this.getProfile().then(profile => profile?.email || null)
+  public getEmail(): Promise<string | undefined> {
+    return this.getProfile().then(profile => profile?.email || undefined)
   }
 
 

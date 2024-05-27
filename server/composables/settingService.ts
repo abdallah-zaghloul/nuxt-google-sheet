@@ -7,8 +7,7 @@ export default {
 
   set: (storeId: string, setting: Setting | SettingReq) => settingRepository.set(storeId, setting),
 
-  connect: (storeId: string, setting: Setting | SettingReq, credentials: Credentials, email: string) => settingRepository.set(storeId, {
-    ...setting,
+  connect: (storeId: string, credentials: Credentials, email?: string) => settingRepository.update(storeId, {
     isConnected: true,
     credentials: credentials,
     email: email
