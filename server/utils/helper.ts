@@ -1,5 +1,3 @@
-import { H3Event } from "h3"
-
 export default {
     check: (valid: boolean, ...args: any) => {
         !valid && console.log(...args)
@@ -13,9 +11,9 @@ export default {
 
     getNestedProp: (array: [] | null, prop: string): any => array?.find(obj => obj?.[prop] !== undefined)?.[prop],
 
-    getStoreId: (event: H3Event): string => event.context.session?.storeId ?? process.env.STORE_ID,
+    getStoreId: (): string => useEvent().context.session?.storeId ?? process.env.STORE_ID,
 
-    getSession: async (event: H3Event) => event.context.session ?? prisma.session.findFirst({
+    getSession: async () => useEvent().context.session ?? prisma.session.findFirst({
         where: {
             storeId: process.env.STORE_ID
         },

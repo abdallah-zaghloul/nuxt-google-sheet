@@ -1,6 +1,7 @@
 import { google, sheets_v4 } from "googleapis"
 import { GaxiosResponse, GaxiosPromise } from "gaxios"
 import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
+import mediatorService from "./mediatorService"
 
 export default class googleService {
 
@@ -50,17 +51,12 @@ export default class googleService {
       clientSecret: this.setting.clientSecret,
       redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
     }))
+
     // set Client Credentials from setting
-    this.setting.credentials && this.setClientCredentials(this.setting.credentials)
+    this.setClientCredentials(this.setting.credentials)
 
     //init google sheet service for auth client
     this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
-  }
-
-
-
-  public getClient(): Client {
-    return this.client
   }
 
 
@@ -76,18 +72,26 @@ export default class googleService {
 
 
 
-  public authTokensByCode(code: string): Promise<Credentials | null> {
+  public authTokensByCode(code: string): Promise<Credentials | null | undefined> {
     return this.client.getToken(code).then(
-      onfulfilled => this.setClientCredentials(onfulfilled.tokens),
-      onrejected => null
+      res => this.setClientCredentials(res.tokens, true)
     )
   }
 
 
 
-  public setClientCredentials(credentials: Credentials) {
-    this.client.setCredentials(credentials)
+  private async setClientCredentials(credentials?: Credentials | null, setEmail: boolean = false) {
+    if (credentials) {
+      this.client.setCredentials(credentials)
+      this.setting.credentials = credentials
+    }
+
+    if (setEmail)
+      this.setting.email = await this.getEmail()
+
+    this.setting = await mediatorService('connectSetting', this.setting.storeId, this.setting.credentials!, this.setting.email)
     return credentials
+
   }
 
 
@@ -103,8 +107,8 @@ export default class googleService {
 
 
 
-  public getEmail(): Promise<string | null> {
-    return this.getProfile().then(profile => profile?.email || null)
+  public getEmail(): Promise<string | undefined> {
+    return this.getProfile().then(profile => profile?.email || undefined)
   }
 
 

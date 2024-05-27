@@ -10,7 +10,7 @@ function isValidYouCanSignature(signature: string, payload: object): boolean {
   return crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature));
 }
 
-export default defineEventHandler((event) => handler.async(event, async () => {
+export default defineEventHandler((event) => handler.async(async () => {
   const reqBody: CreateOrderEvent = await readBody(event)
   const headerSignature = getHeader(event, 'x-youcan-signature')!
   // isValidYouCanSignature(headerSignature, reqBody)

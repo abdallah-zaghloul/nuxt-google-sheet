@@ -18,7 +18,7 @@ const sendAnError = ({
     data
   })
   sendError(event, error)
-  return error
+  throw error
 }
 
 const sendResponse = (data?: any) => ({
@@ -27,42 +27,48 @@ const sendResponse = (data?: any) => ({
   data: data
 })
 
-const globalError = (event: H3Event) => sendAnError({
-  event: event,
+const globalError = () => sendAnError({
+  event: useEvent(),
   statusCode: 500,
   statusMessage: "Sorry something went wrong please try again later"
 })
 
 export default {
-  validationError: (event: H3Event, data: any) => sendAnError({
-    event: event,
+  validationError: (data: any) => sendAnError({
+    event: useEvent(),
     statusCode: 422,
     statusMessage: "Please insert a valid data",
     data: data
   }),
 
-  notFoundError:(event: H3Event) => sendAnError({
-    event: event,
+  notFoundError: () => sendAnError({
+    event: useEvent(),
     statusCode: 404,
     statusMessage: 'Not found'
   }),
 
-  sync: (event: H3Event, fn: Function, catcher?: Function) => {
+  unAuthorizedError: (message = "unAuthorized") => sendAnError({
+    event: useEvent(),
+    statusCode: 401,
+    statusMessage: message
+  }),
+
+  sync: (fn: Function, catcher?: Function) => {
     try {
       return sendResponse(fn())
     } catch (error: any) {
-      return catcher ? catcher() : globalError(event)
+      return catcher ? catcher() : globalError()
     }
   },
 
-  async: (event: H3Event, fn: () => Promise<any>, catcher?: Function) => fn()
+  async: (fn: () => Promise<any>, catcher?: Function) => fn()
     .then(data => sendResponse(data))
-    .catch((error: any) => catcher ? catcher() : globalError(event)),
+    .catch((error: any) => catcher ? catcher() : globalError()),
 
   sendError: sendAnError,
 
   sendResponse: sendResponse,
-  
+
   globalError: globalError,
 
 }

@@ -2,7 +2,7 @@ import sheetService from "~/server/composables/sheetService"
 import { uuidSchema } from "~/server/utils/schemas"
 
 
-export default defineEventHandler((event) => handler.async(event, async () => {
+export default defineEventHandler((event) => handler.async(async () => {
   const id = validator.routeParam(uuidSchema, event, 'id')
-  return await sheetService.get(helper.getStoreId(event), id) ?? handler.notFoundError(event)
+  return await sheetService.get(helper.getStoreId(), id) ?? handler.notFoundError()
 }))
