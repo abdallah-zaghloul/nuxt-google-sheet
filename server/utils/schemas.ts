@@ -86,3 +86,12 @@ export const sheetUpdateSchema = (sheet: Sheet) => z.object({
         status: data.status ?? sheet.status,
     })
 )
+
+
+export const bulkSyncOrdersSchema = z.object({
+    sheetId: uuidSchema,
+    orderRefs: z.array(z.string().regex(/^\d+$/)).refine(
+        orderRefs => (new Set(orderRefs)).size === orderRefs.length, {
+        message: `orderRefs should be unique`
+    })
+})

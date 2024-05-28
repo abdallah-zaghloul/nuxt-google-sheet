@@ -1,4 +1,4 @@
-import { Session, YouCanWebhookSub, YouCanWebhookSubs, YouCanWebhookUnSub } from "../utils/types";
+import { Order, Session, YouCanWebhookSub, YouCanWebhookSubs, YouCanWebhookUnSub } from "../utils/types";
 
 export default class youcanService {
 
@@ -10,8 +10,9 @@ export default class youcanService {
     base: string,
     subscribe: string,
     unsubscribe: string,
-    list: string,
+    listSubscriptions: string,
     syncOrderCallback: string,
+    listOrders: string
   }
   private events: {
     orderCreate: string
@@ -32,8 +33,9 @@ export default class youcanService {
       base: process.env.YOUCAN_BASE_URL!,
       subscribe: `${process.env.YOUCAN_BASE_URL!}/resthooks/subscribe`,
       unsubscribe: `${process.env.YOUCAN_BASE_URL!}/resthooks/unsubscribe`,
-      list: `${process.env.YOUCAN_BASE_URL!}/resthooks/list`,
-      syncOrderCallback: process.env.YOUCAN_SYNC_ORDER_CALLBACK_URL!
+      listSubscriptions: `${process.env.YOUCAN_BASE_URL!}/resthooks/list`,
+      syncOrderCallback: process.env.YOUCAN_SYNC_ORDER_CALLBACK_URL!,
+      listOrders: `${process.env.YOUCAN_BASE_URL!}/orders`
     }
 
     this.events = {
@@ -54,7 +56,7 @@ export default class youcanService {
   }
 
   public listSubscriptions(): Promise<YouCanWebhookSubs> {
-    return this.call<YouCanWebhookSubs>(this.urls.list)
+    return this.call<YouCanWebhookSubs>(this.urls.listSubscriptions)
   }
 
   public async unSubscribeAll(): Promise<boolean> {
@@ -101,6 +103,19 @@ export default class youcanService {
       target_url: this.urls.syncOrderCallback,
       event: this.events.orderCreate
     })
+  }
+
+  public orderByRef(orderRef: `${number}`) {
+    return this.call<{ data: [Order?] }>(
+      `${this.urls.listOrders}?q=${orderRef}`
+    ).then((resBody) => resBody?.data?.at(0))
+  }
+
+
+  public ordersByRef(orderRefs: `${number}`[]) {
+    return Promise.all(
+      orderRefs.map(orderRef => this.orderByRef(orderRef))
+    )
   }
 
 }

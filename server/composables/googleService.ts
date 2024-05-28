@@ -1,6 +1,6 @@
 import { google, sheets_v4 } from "googleapis"
 import { GaxiosResponse, GaxiosPromise } from "gaxios"
-import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, CreateOrderEvent } from "../utils/types"
+import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, OrderEvent, Order } from "../utils/types"
 import mediatorService from "./mediatorService"
 
 export default class googleService {
@@ -203,7 +203,7 @@ export default class googleService {
   }
 
 
-  public appendOrderToSheet(spreadSheetId: string, orderEvent: CreateOrderEvent, headers: Headers)
+  public appendOrderToSheet(spreadSheetId: string, orderEvent: OrderEvent, headers: Headers)
     : GaxiosPromise<sheets_v4.Schema$AppendValuesResponse> {
 
     const appendRowToSheet = () => this.spreadSheetService.values.append({
@@ -303,9 +303,9 @@ export default class googleService {
 
 
 
-  private orderEventToSheetRow(orderEvent: CreateOrderEvent, headers: Headers): (string | number | null | undefined)[] {
+  private orderEventToSheetRow(orderEvent: OrderEvent, headers: Headers): (string | number | null | undefined)[] {
 
-    const order = {
+    const orderData = {
       "Order ID": orderEvent?.ref,
       "First name": orderEvent?.customer?.first_name,
       "Last name": orderEvent?.customer?.last_name,
@@ -357,6 +357,65 @@ export default class googleService {
       "Product variant": helper.getNestedProp(orderEvent?.variants, 'product_variant'),
     }
 
-    return headers.map(header => order?.[header])
+    return headers.map(header => orderData?.[header])
   }
+
+
+  private orderToSheetRow(order: Order, headers: Headers): (string | number | null | undefined)[] {
+
+    const orderData = {
+      "Order ID": order?.ref,
+      //missing
+      "First name": order?.customer?.first_name,
+      "Last name": order?.customer?.last_name,
+      "Full name": order?.customer?.full_name,
+      "Email": order?.customer?.email,
+      "Phone": order?.customer?.phone,
+      "Country": order?.customer?.country,
+      "Region": order?.customer?.region,
+      "City": order?.customer?.city,
+      "Address city": order?.shipping?.address?.city,
+      "Address state": order?.shipping?.address?.state,
+      "Address country": order?.shipping?.address?.country_name,
+      "Address currency": order?.customer_currency?.code,
+      "Address zip code": order?.shipping?.address?.zip_code,
+      "Address 1": order?.shipping?.address?.first_line,
+      "Address 2": order?.shipping?.address?.second_line,
+
+      "Full address": [
+        order?.shipping?.address?.country_name,
+        order?.shipping?.address?.state,
+        order?.shipping?.address?.city,
+        order?.shipping?.address?.region,
+        order?.shipping?.address?.company,
+        order?.shipping?.address?.first_line,
+        order?.shipping?.address?.second_line,
+        order?.shipping?.address?.zip_code
+      ].join(','),
+
+      "Total tax": order?.vat,
+      "Order date": order?.created_at,
+      "Total charge": order?.total,
+      "Total shipping fees": order?.shipping?.price,
+      "Payment status": order?.payment?.status,
+      "Total discount": order?.discount?.value,
+      "Total quantity": helper.getNestedProp(order?.variants, 'quantity'),
+      "Shipping status": order?.shipping?.status,
+      "Tracking number": order?.shipping?.tracking_number,
+      "Variant price": helper.getNestedProp(order?.variants, 'price'),
+      "Order customer currency": order?.customer_currency?.code,
+      "Total with customer currency": order?.customer_currency?.major_value,
+
+      "SKU": helper.getNestedProp(order?.variants, 'sku'), 
+      "Vendor": helper.getNestedProp(order?.variants, 'vendor'),
+      "Total coupon": helper.getNestedProp(order?.variants, 'total_coupon'),
+      "Payment gateway": helper.getNestedProp(order?.variants, 'payment_gateway'),
+      "Product name": helper.getNestedProp(order?.variants, 'product_name'),
+      "Product URL": helper.getNestedProp(order?.variants, 'product_url'),
+      "Product variant": helper.getNestedProp(order?.variants, 'product_variant'),
+    }
+
+    return headers.map(header => orderData?.[header])
+  }
+
 }

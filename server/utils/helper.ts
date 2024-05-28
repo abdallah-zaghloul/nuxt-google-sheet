@@ -9,7 +9,7 @@ export default {
         process.exit()
     },
 
-    getNestedProp: (array: [] | null, prop: string): any => array?.find(obj => obj?.[prop] !== undefined)?.[prop],
+    getNestedProp: (array: any[] | null, prop: string): any => array?.find(obj => obj?.[prop] !== undefined)?.[prop],
 
     getStoreId: (): string => useEvent().context.session?.storeId ?? process.env.STORE_ID,
 
