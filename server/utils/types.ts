@@ -292,9 +292,9 @@ export type Order = {
     status: number, /* 2 */
 
     //"gateway_type" extra
-    gateway_type: number, /* 0 */
+    gateway_type?: number, /* 0 */
     //"gateway_type_text" extra
-    gateway_type_text: string, /* "Unknown Gateway" */
+    gateway_type_text?: string, /* "Unknown Gateway" */
 
     created_at: Date, /* "2024-05-15 15:48" */
     updated_at: Date /* "2024-05-15 15:48" */
@@ -315,6 +315,25 @@ export type Order = {
     created_at: Date, /* "2024-05-15 15:48" */
     updated_at: Date, /*  "2024-05-15 15:48" */
     // "delegated_to_canshipy" missing
+    address: {
+      id: string, /* "58b17850-1ff4-4bdd-917b-1f9f4933d51d" */
+      first_name: string, /* Abdallah" */
+      last_name: string, /* "Zaghloul" */
+      full_name: string, /* "Abdallah Zaghloul" */
+      first_line: string, /* "Egypt" */
+      second_line: string, /* "Talaat Mostafa Buildings" */
+      company: string, /* "YouCan" */
+      phone: string, /* "+201098526412" */
+      country_code: string, /* "EG" */
+      country_name: string, /* "Egypt" */
+      state: null,
+      region: string, /* "Mandarah Qebli" */
+      city: string, /* "Alexandria" */
+      zip_code: `${number}`, /* "51511" */
+      default: boolean, /* true */
+      created_at: Date, /* 1716372292 */
+      updated_at: Date, /* 1716374592 */
+    }
   },
   // "payload" missing
   // "address" missing
@@ -418,7 +437,48 @@ export type Order = {
         }
       }
     }
-  ]
-  // "customer" missing
+  ],
+  customer: {
+    id: string, /* "1ece4594-538c-425c-943b-b9a57318cf35" */
+    first_name: string, /* "Abdallah" */
+    last_name: string, /* "Zaghloul" */
+    full_name: string, /* "Abdallah Zaghloul" */
+    email: string, /* "3bdallahzaghloul@gmail.com" */
+    avatar: string, /* "https://www.gravatar.com/avatar/7e7845c46efd6606dfd0d28afe236dbe?s=100&d=http://seller-area.youcanshop.dev/store-admin/images/generic_avatar.png" */,
+    phone: string | null,
+    country: string, /* "Egypt" */
+    region: string | null,
+    city: string, /* "matrouh" */
+    notes?: string, /* ? */
+    location: string, /* ", Egypt" */
+    created_at: Date, /* "2024-04-14T21:20:03+00:00" */
+    updated_at: Date, /* "2024-04-14T21:20:03+00:00" */
+    deleted_at: Date | null,
+    links: {
+      show: string, /* "http://api.youcanshop.dev/customers/1ece4594-538c-425c-943b-b9a57318cf35" */
+      edit: string /* "http://api.youcanshop.dev/customers/1ece4594-538c-425c-943b-b9a57318cf35" */
+    },
+    address?: [
+      {
+        id: string, /* "58b17850-1ff4-4bdd-917b-1f9f4933d51d" */
+        first_name: string, /* Abdallah" */
+        last_name: string, /* "Zaghloul" */
+        full_name: string, /* "Abdallah Zaghloul" */
+        first_line: string, /* "Egypt" */
+        second_line: string, /* "Talaat Mostafa Buildings" */
+        company: string, /* "YouCan" */
+        phone: string, /* "+201098526412" */
+        country_code: string, /* "EG" */
+        country_name: string, /* "Egypt" */
+        state: null,
+        region: string, /* "Mandarah Qebli" */
+        city: string, /* "Alexandria" */
+        zip_code: `${number}`, /* "51511" */
+        default: boolean, /* true */
+        created_at: Date, /* 1716372292 */
+        updated_at: Date, /* 1716374592 */
+      }
+    ]
+  },
 }
 

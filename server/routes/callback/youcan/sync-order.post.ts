@@ -21,7 +21,7 @@ export default defineEventHandler((event) => handler.async(async () => {
   const syncableSheets = await sheetService.getSyncables(reqBody.store_id)
 
   return Promise.allSettled(
-    syncableSheets.map(sheet => googleClientService.appendOrderToSheet(sheet.googleId, reqBody, sheet.headers))
+    syncableSheets.map(sheet => googleClientService.appendOrdersToSheet(sheet.googleId, sheet.headers, reqBody))
   )
 
 }))

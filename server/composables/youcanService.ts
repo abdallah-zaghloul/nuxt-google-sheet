@@ -18,10 +18,14 @@ export default class youcanService {
     orderCreate: string
   }
 
+
+
   //singleton
   public static init(session: Session) {
     return youcanService.instance ??= (new youcanService(session))
   }
+
+
 
   //singleton private constructor
   private constructor(session: Session) {
@@ -43,6 +47,8 @@ export default class youcanService {
     }
   }
 
+
+
   private call<T>(url: string, options?: RequestInit): Promise<T> {
     return fetch(url, {
       ...options,
@@ -55,14 +61,20 @@ export default class youcanService {
     )
   }
 
-  public listSubscriptions(): Promise<YouCanWebhookSubs> {
+
+
+  private listSubscriptions(): Promise<YouCanWebhookSubs> {
     return this.call<YouCanWebhookSubs>(this.urls.listSubscriptions)
   }
 
-  public async unSubscribeAll(): Promise<boolean> {
+
+
+  private async unSubscribeAll(): Promise<boolean> {
     const subs = await this.listSubscriptions()
     return this.batchUnSubscribe(subs)
   }
+
+
 
   private batchUnSubscribe(subs: YouCanWebhookSubs): Promise<boolean> {
     const unsubs = Promise.allSettled(subs.map(sub => this.unSubscribe(sub.id)))
@@ -73,16 +85,21 @@ export default class youcanService {
   }
 
 
-  public async unSubscribeCreatedOrderSubs(): Promise<boolean> {
+
+  private async unSubscribeCreatedOrderSubs(): Promise<boolean> {
     const createdOrderSubs = await this.listCreatedOrderSubs()
     return this.batchUnSubscribe(createdOrderSubs)
   }
 
-  public async listCreatedOrderSubs() {
+
+
+  private async listCreatedOrderSubs() {
     return await this.listSubscriptions().then(
       subs => subs.filter(sub => (sub.event === this.events.orderCreate))
     )
   }
+
+
 
   private subscribe(reqBody: YouCanWebhookSub): Promise<{ id: string }> {
     return this.call<{ id: string }>(this.urls.subscribe, {
@@ -91,6 +108,8 @@ export default class youcanService {
     })
   }
 
+
+
   private unSubscribe(id: string): Promise<YouCanWebhookUnSub> {
     return this.call<YouCanWebhookUnSub>(`${this.urls.unsubscribe}/${id}`, {
       method: 'POST',
@@ -98,24 +117,41 @@ export default class youcanService {
   }
 
 
-  public subscribeCreatedOrder(): Promise<{ id: string }> {
+
+  private subscribeCreatedOrder(): Promise<{ id: string }> {
     return this.subscribe({
       target_url: this.urls.syncOrderCallback,
       event: this.events.orderCreate
     })
   }
 
+
+
   public orderByRef(orderRef: `${number}`) {
+    const query = new URLSearchParams({
+      q: orderRef,
+      include: 'customer'
+    })
+
     return this.call<{ data: [Order?] }>(
-      `${this.urls.listOrders}?q=${orderRef}`
+      `${this.urls.listOrders}?${query}`
     ).then((resBody) => resBody?.data?.at(0))
   }
 
 
-  public ordersByRef(orderRefs: `${number}`[]) {
+
+  public ordersByRef(orderRefs: `${number}`[]): Promise<(Order | undefined)[]> {
     return Promise.all(
       orderRefs.map(orderRef => this.orderByRef(orderRef))
     )
+  }
+
+
+
+  public async syncOrders() {
+    await this.unSubscribeCreatedOrderSubs()
+    await this.subscribeCreatedOrder()
+    return await this.listCreatedOrderSubs()
   }
 
 }

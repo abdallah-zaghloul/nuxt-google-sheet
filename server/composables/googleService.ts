@@ -203,24 +203,24 @@ export default class googleService {
   }
 
 
-  public appendOrderToSheet(spreadSheetId: string, orderEvent: OrderEvent, headers: Headers)
-    : GaxiosPromise<sheets_v4.Schema$AppendValuesResponse> {
+  public async appendOrdersToSheet(spreadSheetId: string, headers: Headers, ...orders: (Order | OrderEvent | undefined)[])
+    : Promise<boolean> {
 
-    const appendRowToSheet = () => this.spreadSheetService.values.append({
+    const appendRowsToSheet = () => this.spreadSheetService.values.append({
       spreadsheetId: spreadSheetId,
       range: this.mainSheetRange,
       valueInputOption: this.valueInputOption,
       requestBody: {
-        values: [this.orderEventToSheetRow(orderEvent, headers)]
+        values: this.ordersToSheetRows(orders, headers)
       }
     })
 
-    return this.getOrSetMainSheet(spreadSheetId).then(
-      async ({ hasOldMainSheet }) => hasOldMainSheet ? appendRowToSheet() : this.batchUpdateSpreadSheet(
-        spreadSheetId,
-        await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
-      ).then(() => appendRowToSheet())
+    return this.batchUpdateSpreadSheet(
+      spreadSheetId,
+      await this.spreadSheetReq().updateMainSheetHeaders(spreadSheetId, headers)
     )
+      .then(() => appendRowsToSheet())
+      .then(res => helper.checkRes(res))
   }
 
 
@@ -233,7 +233,7 @@ export default class googleService {
     googleUrl: string
   }): GoogleSpreadSheet | null {
 
-    if (helper.check((res.status >= 200 && res.status < 300), res))
+    if (helper.checkRes(res))
       return {
         title: title,
         headers: headers,
@@ -303,69 +303,10 @@ export default class googleService {
 
 
 
-  private orderEventToSheetRow(orderEvent: OrderEvent, headers: Headers): (string | number | null | undefined)[] {
-
-    const orderData = {
-      "Order ID": orderEvent?.ref,
-      "First name": orderEvent?.customer?.first_name,
-      "Last name": orderEvent?.customer?.last_name,
-      "Full name": orderEvent?.customer?.full_name,
-      "Email": orderEvent?.customer?.email,
-      "Phone": orderEvent?.customer?.phone,
-      "Country": orderEvent?.customer?.country,
-      "Region": orderEvent?.customer?.region,
-      "City": orderEvent?.customer?.city,
-      "Address city": orderEvent?.shipping?.address?.city,
-      "Address state": orderEvent?.shipping?.address?.state,
-      "Address country": orderEvent?.shipping?.address?.country_name,
-      "Address currency": orderEvent?.customer_currency?.code,
-      "Address zip code": orderEvent?.shipping?.address?.zip_code,
-      "Address 1": orderEvent?.shipping?.address?.first_line,
-      "Address 2": orderEvent?.shipping?.address?.second_line,
-
-      "Full address": [
-        orderEvent?.shipping?.address?.country_name,
-        orderEvent?.shipping?.address?.state,
-        orderEvent?.shipping?.address?.city,
-        orderEvent?.shipping?.address?.region,
-        orderEvent?.shipping?.address?.company,
-        orderEvent?.shipping?.address?.first_line,
-        orderEvent?.shipping?.address?.second_line,
-        orderEvent?.shipping?.address?.zip_code
-      ].join(','),
-
-      "Total tax": orderEvent?.vat,
-      "Order date": orderEvent?.created_at,
-      "Total charge": orderEvent?.total,
-      "Total shipping fees": orderEvent?.shipping?.price,
-      "Payment status": orderEvent?.payment?.status,
-      "Total discount": orderEvent?.discount?.value,
-      "Total quantity": helper.getNestedProp(orderEvent?.variants, 'quantity'),
-      "Shipping status": orderEvent?.shipping?.status,
-      "Tracking number": orderEvent?.shipping?.tracking_number,
-      "Variant price": helper.getNestedProp(orderEvent?.variants, 'price'),
-      "Order customer currency": orderEvent?.customer_currency?.code,
-      "Total with customer currency": orderEvent?.customer_currency?.major_value,
-
-      //missing
-      "SKU": helper.getNestedProp(orderEvent?.variants, 'sku'), /* Stock Keeping Unit */
-      "Vendor": helper.getNestedProp(orderEvent?.variants, 'vendor'),
-      "Total coupon": helper.getNestedProp(orderEvent?.variants, 'total_coupon'),
-      "Payment gateway": helper.getNestedProp(orderEvent?.variants, 'payment_gateway'),
-      "Product name": helper.getNestedProp(orderEvent?.variants, 'product_name'),
-      "Product URL": helper.getNestedProp(orderEvent?.variants, 'product_url'),
-      "Product variant": helper.getNestedProp(orderEvent?.variants, 'product_variant'),
-    }
-
-    return headers.map(header => orderData?.[header])
-  }
-
-
-  private orderToSheetRow(order: Order, headers: Headers): (string | number | null | undefined)[] {
+  private orderToSheetRow(order: Order | OrderEvent, headers: Headers): any[] {
 
     const orderData = {
       "Order ID": order?.ref,
-      //missing
       "First name": order?.customer?.first_name,
       "Last name": order?.customer?.last_name,
       "Full name": order?.customer?.full_name,
@@ -405,17 +346,26 @@ export default class googleService {
       "Variant price": helper.getNestedProp(order?.variants, 'price'),
       "Order customer currency": order?.customer_currency?.code,
       "Total with customer currency": order?.customer_currency?.major_value,
+      "SKU": helper.getNestedProp(order?.variants, 'variant')?.sku,
 
-      "SKU": helper.getNestedProp(order?.variants, 'sku'), 
+      //missing
       "Vendor": helper.getNestedProp(order?.variants, 'vendor'),
       "Total coupon": helper.getNestedProp(order?.variants, 'total_coupon'),
-      "Payment gateway": helper.getNestedProp(order?.variants, 'payment_gateway'),
-      "Product name": helper.getNestedProp(order?.variants, 'product_name'),
-      "Product URL": helper.getNestedProp(order?.variants, 'product_url'),
-      "Product variant": helper.getNestedProp(order?.variants, 'product_variant'),
+      "Payment gateway": order?.payment?.gateway_type_text,
+
+      "Product name": helper.getNestedProp(order?.variants, 'variant')?.product?.name,
+      "Product URL": helper.getNestedProp(order?.variants, 'variant')?.product?.public_url,
+      "Product variant": helper.getNestedProp(order?.variants, 'variant')?.product?.has_variants,
     }
 
     return headers.map(header => orderData?.[header])
+  }
+
+  private ordersToSheetRows(orders: (Order | OrderEvent | undefined)[], headers: Headers): any[] {
+    return orders.reduce((orderRows: any[], order) => {
+      helper.isSet(order) && orderRows.push(this.orderToSheetRow(order!, headers))
+      return orderRows
+    }, [])
   }
 
 }
