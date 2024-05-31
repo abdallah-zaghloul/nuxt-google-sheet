@@ -5,7 +5,7 @@ import mediatorService from "./mediatorService"
 
 export default class googleService {
 
-  private static instance?: googleService
+  private static instance: googleService
   private client: Client
   private setting: Setting
   private scope: string[]
@@ -21,12 +21,12 @@ export default class googleService {
 
 
   //singleton
-  public static initClient(setting: Setting) {
-    return googleService.instance ??= (new googleService(setting))
+  public static initClient(setting: Setting, authCode?: string) {
+    return googleService.instance = (new googleService(setting, authCode))
   }
 
   //singleton private constructor
-  private constructor(setting: Setting) {
+  private constructor(setting: Setting, authCode?: string) {
     //google static options
     this.accessType = 'offline'
     this.prompt = 'consent'
@@ -52,8 +52,8 @@ export default class googleService {
       redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
     }))
 
-    // set Client Credentials from setting
-    this.setClientCredentials(this.setting.credentials)
+    //auth client or fail
+    this.authClient(this.setting.credentials, authCode)
 
     //init google sheet service for auth client
     this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
@@ -72,26 +72,37 @@ export default class googleService {
 
 
 
-  public authTokensByCode(code: string): Promise<Credentials | null | undefined> {
-    return this.client.getToken(code).then(
-      res => this.setClientCredentials(res.tokens, true)
-    )
+  private async authClient(credentials?: Credentials | null, authCode?: string) {
+
+    try {
+      // exchange authCode with credentials (token), set email for first time
+      if (authCode) {
+        credentials = await this.client.getToken(authCode).then(res => res.tokens)
+        this.client.setCredentials(credentials!)
+        this.setting = await mediatorService('connectSetting', this.setting.storeId, credentials!, await this.getEmail())
+      }
+      //auth & refresh credentials
+      if (credentials) {
+        // credentials = await this.client.refreshAccessToken().then(res => res.credentials)
+        this.client.setCredentials(credentials!)
+        this.setting = await mediatorService('connectSetting', this.setting.storeId, credentials!)
+      }
+      //client try to utilize google service without being auth
+      return credentials
+
+    } catch (err) {
+      //failure to auth using (code | refresh credentials)
+      return await this.unAuthClient()
+    }
+
   }
 
 
 
-  private async setClientCredentials(credentials?: Credentials | null, setEmail: boolean = false) {
-    if (credentials) {
-      this.client.setCredentials(credentials)
-      this.setting.credentials = credentials
-    }
 
-    if (setEmail)
-      this.setting.email = await this.getEmail()
-
-    this.setting = await mediatorService('connectSetting', this.setting.storeId, this.setting.credentials!, this.setting.email)
-    return credentials
-
+  private async unAuthClient() {
+    this.setting = await mediatorService('disconnectSetting', this.setting.storeId)
+    return handler.unAuthorizedError('Please reconnect your google account')
   }
 
 
