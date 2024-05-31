@@ -482,3 +482,9 @@ export type Order = {
   },
 }
 
+export type GoogleAuthWays = {
+  authCode: (authCode: string) => Promise<Credentials>;
+  credentials: () => Promise<Credentials>;
+  authUrl: () => Promise<string>;
+}
+
