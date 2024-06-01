@@ -9,7 +9,7 @@ export default defineEventHandler((event) => handler.async(async () => {
 
     if (isConnected) {
         const setting = await settingService.set(storeId, { clientId, clientSecret })
-        await sendRedirect(event, googleService.initClient(setting).getAuthUrl())
+        await sendRedirect(event, googleService.initClient(setting).getAuthUrl()!)
     }
 
     return settingService.disconnect(storeId)
