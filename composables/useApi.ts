@@ -21,13 +21,15 @@ const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>) => useFetch
   onRequestError({ error }) {
     toast.show({
       title: "Error",
-      description: error.message
+      description: error.message,
+      type: "error"
     })
   },
   onResponseError({ error }) {
     toast.show({
       title: "Error",
-      description: error?.message
+      description: error?.message,
+      type: "error"
     })
   },
   ...options,
