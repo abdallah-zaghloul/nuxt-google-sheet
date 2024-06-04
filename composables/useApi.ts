@@ -11,7 +11,8 @@ import type {
 const paginationCount = Number(process.env.PAGINATION_COUNT ?? 1000)
 
 // global fetcher
-const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>): Promise<Ref<T | null>> => useFetch(url, {
+const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>) => useFetch<T>(url, {
+  //@ts-ignore
   method: "GET",
   headers: {
     "Content-Type": "application/json",
@@ -33,7 +34,7 @@ const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>): Promise<Re
 
 }).then(
   //@ts-ignore retrive data key
-  ({ data: resBody }: { data: Ref<ResBody<T>> }) => ref(resBody.value.data)
+  ({ data: resBody }: { data: Ref<ResBody<T>> }) => resBody?.value?.data as T
 )
 
 
@@ -41,7 +42,7 @@ const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>): Promise<Re
 
 export default {
 
-  getSetting: () => fetcher<Setting>("/setting"),
+  getSetting: () => fetcher<Setting | null>("/setting"),
 
 
 
@@ -60,7 +61,7 @@ export default {
 
 
 
-  getSheets: (id: string, take?: number, skip?: number) => fetcher<Sheet[]>("/sheet", {
+  getSheets: (take?: number, skip?: number) => fetcher<Sheet[]>("/sheet", {
     query: {
       take: take ?? paginationCount
     },
