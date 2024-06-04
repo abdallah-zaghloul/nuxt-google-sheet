@@ -1,21 +1,39 @@
+//@ts-nocheck
 import type { UseFetchOptions } from "nuxt/app";
-import type { Setting } from "../types";
+import type { Setting, ResBody } from "../utils/types";
+import { toast } from "@youcan/ui-vue3/helpers";
+import { ResBody } from "../server/utils/types";
 
-const fetcher = <T>(url: string, options?: UseFetchOptions<unknown, unknown>) => useFetch<T>(url, {
-  //@ts-ignore
+const fetcher = <T>(url: string, options?: UseFetchOptions<unknown>): Promise<Ref<T | null>> => useFetch(url, {
   method: "GET",
-  ...options
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  },
+  onRequestError({ error }) {
+    toast.show({
+      title: "Error",
+      description: error.message
+    })
+  },
+  onResponseError({ error }) {
+    toast.show({
+      title: "Error",
+      description: error?.message
+    })
+  },
+  ...options,
+
 }).then(
-  //@ts-ignore
-  res => ref<T>(res.data?.value?.data!),
+  ({ data: resBody }: { data: Ref<ResBody<T>> }) => ref(resBody.value.data)
 )
 
 export default {
 
-  getSetting: () => fetcher<Setting | null>('/setting'),
+  getSetting: () => fetcher<Setting>("/setting"),
 
-  setSetting: (setting: Setting) => fetcher<Setting>('/setting', {
-    method: 'POST',
+  setSetting: (setting: Partial<Setting>) => fetcher<Setting>("/setting", {
+    method: "POST",
     body: setting
   }),
 

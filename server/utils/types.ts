@@ -1,6 +1,12 @@
 import { Auth } from "googleapis"
 import { Session } from "@prisma/client"
 
+export type ResBody<T> = {
+  statusCode: number,
+  statusMessage: string,
+  data: T
+}
+
 export type Credentials = Auth.Credentials;
 
 export type Client = Auth.OAuth2Client
