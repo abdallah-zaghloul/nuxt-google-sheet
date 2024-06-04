@@ -1,5 +1,6 @@
 import { google, sheets_v4 } from "googleapis"
 import { GaxiosResponse, GaxiosPromise } from "gaxios"
+import { H3Event } from "h3"
 import { Client, Setting, Credentials, GoogleSpreadSheet, Headers, UserProfileInfo, OrderEvent, Order } from "../utils/types"
 import mediatorService from "./mediatorService"
 
@@ -8,6 +9,7 @@ export default class googleService {
   private static instance?: googleService
   private client: Client
   private setting: Setting
+  private http: H3Event
   private scope: string[]
   private accessType: string
   private prompt: string
@@ -15,18 +17,24 @@ export default class googleService {
   private mainSheetTitle: string
   private mainSheetRange: string
   private userInfoUrl: string
+  private authUrl?: string
   private updateFields: { title: string, custom: string }
+  private authUrlRoute: { path: string, method: string }
+
   //services
   private spreadSheetService: sheets_v4.Resource$Spreadsheets
 
 
-  //singleton
-  public static initClient(setting: Setting) {
-    return googleService.instance ??= (new googleService(setting))
+
+  //singleton|constructor wrapper
+  public static initClient(setting: Setting, authCode?: string) {
+    return googleService.instance = (new googleService(setting, authCode))
   }
 
+
+
   //singleton private constructor
-  private constructor(setting: Setting) {
+  private constructor(setting: Setting, authCode?: string) {
     //google static options
     this.accessType = 'offline'
     this.prompt = 'consent'
@@ -44,6 +52,15 @@ export default class googleService {
       // 'https://www.googleapis.com/auth/userinfo.profile' //user full profile info permission
     ]
 
+    //route used to set setting connectivity & credentials
+    this.authUrlRoute = {
+      path: '/setting',
+      method: 'POST'
+    }
+
+    //current http event
+    this.http = useEvent()
+
     // setting & OAuth2Client
     this.setting = setting
     this.client = (new google.auth.OAuth2({
@@ -52,8 +69,8 @@ export default class googleService {
       redirectUri: process.env.GOOGLE_AUTH_CALLBACK_URL
     }))
 
-    // set Client Credentials from setting
-    this.setClientCredentials(this.setting.credentials)
+    //auth client or fail
+    this.authClient(this.setting.credentials, authCode)
 
     //init google sheet service for auth client
     this.spreadSheetService = google.sheets({ version: "v4", auth: this.client }).spreadsheets
@@ -62,7 +79,13 @@ export default class googleService {
 
 
   public getAuthUrl() {
-    return this.client.generateAuthUrl({
+    return this.authUrl
+  }
+
+
+
+  private setAuthUrl() {
+    this.authUrl = this.client.generateAuthUrl({
       access_type: this.accessType,
       prompt: this.prompt,
       state: this.setting.storeId,
@@ -72,42 +95,95 @@ export default class googleService {
 
 
 
-  public authTokensByCode(code: string): Promise<Credentials | null | undefined> {
-    return this.client.getToken(code).then(
-      res => this.setClientCredentials(res.tokens, true)
+  private authClient(credentials?: Credentials | null, authCode?: string) {
+
+    switch (true) {
+      //connect client using credentials or fail
+      case !!credentials:
+        return this.connectClient(credentials)
+      //connect client using authCode or fail
+      case !!authCode:
+        this.authTokensByCode(authCode)
+        return
+      //ignore auth if this is generateAuthUrlRoute
+      case this.isAuthUrlRoute():
+        this.setAuthUrl()
+        return
+      //disconnect client in case of none of the above conditions
+      default:
+        return this.disconnectClient()
+    }
+
+  }
+
+
+
+  private isAuthUrlRoute() {
+    return this.http.path === this.authUrlRoute.path && this.http.method === this.authUrlRoute.method
+  }
+
+
+
+  private async authTokensByCode(authCode: string) {
+    return this.client.getToken(authCode).then(
+      res => this.authClient(res?.tokens)
     )
   }
 
 
 
-  private async setClientCredentials(credentials?: Credentials | null, setEmail: boolean = false) {
-    if (credentials) {
+  private connectClient(credentials: Credentials) {
+    try {
+
       this.client.setCredentials(credentials)
-      this.setting.credentials = credentials
+
+      const connectSetting = async () => await mediatorService(
+        'connectSetting',
+        this.setting.storeId,
+        credentials,
+        this.setting.email ?? await this.getEmail()
+      ).then(
+        setting => this.setting = setting
+      )
+
+      connectSetting()
+      return credentials!
+
+    } catch (err) {
+      return this.disconnectClient()
     }
-
-    if (setEmail)
-      this.setting.email = await this.getEmail()
-
-    this.setting = await mediatorService('connectSetting', this.setting.storeId, this.setting.credentials!, this.setting.email)
-    return credentials
 
   }
 
 
 
-  public getProfile(): Promise<UserProfileInfo | null> {
+  private disconnectClient() {
+
+    const disconnectSetting = async () => await mediatorService(
+      'disconnectSetting',
+      this.setting.storeId
+    ).then(
+      setting => this.setting = setting
+    )
+
+    disconnectSetting()
+    return handler.unAuthorizedError('Please reconnect your google account')
+  }
+
+
+
+
+  public async getProfile(): Promise<UserProfileInfo> {
     return this.client.request({
       url: this.userInfoUrl
     }).then(
-      profile => profile.data as UserProfileInfo,
-      onrejected => null
+      res => res.data as UserProfileInfo,
     )
   }
 
 
 
-  public getEmail(): Promise<string | undefined> {
+  public async getEmail(): Promise<string | undefined> {
     return this.getProfile().then(profile => profile?.email || undefined)
   }
 
@@ -170,7 +246,7 @@ export default class googleService {
 
 
 
-  public createSpreadSheet(title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
+  public async createSpreadSheet(title: string, headers: Headers): Promise<GoogleSpreadSheet | null> {
     return this.spreadSheetService.create({
       requestBody: this.spreadSheetReq().createSpreadSheet(title, headers)
     }).then(
@@ -203,10 +279,11 @@ export default class googleService {
   }
 
 
+
   public async appendOrdersToSheet(spreadSheetId: string, headers: Headers, ...orders: (Order | OrderEvent | undefined)[])
     : Promise<boolean> {
 
-    const appendRowsToSheet = () => this.spreadSheetService.values.append({
+    const appendRowsToSheet = async () => this.spreadSheetService.values.append({
       spreadsheetId: spreadSheetId,
       range: this.mainSheetRange,
       valueInputOption: this.valueInputOption,
@@ -246,7 +323,7 @@ export default class googleService {
 
 
 
-  private getSheets(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet[]> {
+  private async getSheets(spreadSheetId: string): Promise<sheets_v4.Schema$Sheet[]> {
     return this.spreadSheetService.get({
       spreadsheetId: spreadSheetId
     }).then(
@@ -283,13 +360,13 @@ export default class googleService {
 
 
 
-  private getMainSheetId(spreadSheetId: string): Promise<number | null | undefined> {
+  private async getMainSheetId(spreadSheetId: string): Promise<number | null | undefined> {
     return this.getOrSetMainSheet(spreadSheetId).then(({ mainSheet }) => mainSheet.properties?.sheetId)
   }
 
 
 
-  private batchUpdateSpreadSheet(spreadSheetId: string, ...requests: sheets_v4.Schema$Request[])
+  private async batchUpdateSpreadSheet(spreadSheetId: string, ...requests: sheets_v4.Schema$Request[])
     : GaxiosPromise<sheets_v4.Schema$BatchUpdateSpreadsheetResponse> {
     return this.spreadSheetService.batchUpdate({
       spreadsheetId: spreadSheetId,
@@ -360,6 +437,8 @@ export default class googleService {
 
     return headers.map(header => orderData?.[header])
   }
+
+
 
   private ordersToSheetRows(orders: (Order | OrderEvent | undefined)[], headers: Headers): any[] {
     return orders.reduce((orderRows: any[], order) => {
