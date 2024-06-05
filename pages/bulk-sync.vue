@@ -12,6 +12,7 @@ const ordersToSync = ref('');
 
 function handleSubmit(e: Event) {
   e.preventDefault();
+  // useApi.manualSyncSheet()
   // TODO: Sync orders with selected Google Sheet
 }
 </script>
