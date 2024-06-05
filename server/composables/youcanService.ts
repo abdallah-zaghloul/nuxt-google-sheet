@@ -22,7 +22,7 @@ export default class youcanService {
 
   //singleton
   public static init(session: Session) {
-    return youcanService.instance ??= (new youcanService(session))
+    return youcanService.instance = (new youcanService(session))
   }
 
 
