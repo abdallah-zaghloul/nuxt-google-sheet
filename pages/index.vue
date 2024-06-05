@@ -31,8 +31,5 @@ const setting = useSetting(await useApi.getSetting())
         <Sheets />
       </template>
     </Card>
-    <NuxtLink to="/sheet/3">
-      Single page
-    </NuxtLink>
   </div>
 </template>
