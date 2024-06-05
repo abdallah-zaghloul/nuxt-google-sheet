@@ -83,6 +83,7 @@ same as nuxt response
 ```
 available Status/Http codes:
 - 422: unprocessable entity (validation)
+- 401: unauthenticated
 - 404: not found
 - 200: success
 - 500: internal server (global error)
