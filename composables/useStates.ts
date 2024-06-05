@@ -1,4 +1,4 @@
-import type { Setting } from "../types"
+import type { Setting } from "../utils/types"
 
 export const useYoucanSession = () => useState(
   'youcanSession', () => useRequestEvent()?.context.session

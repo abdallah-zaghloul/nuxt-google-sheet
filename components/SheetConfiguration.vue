@@ -2,24 +2,34 @@
 import draggable from "vuedraggable";
 import { InputGroup, Input, MultiselectDropdown, SecondaryButton } from '@youcan/ui-vue3'
 import { ref } from 'vue'
+import type { OrderId, Header, Headers } from "../utils/types";
+import { toast } from "@youcan/ui-vue3/helpers";
 
 const products: any[] = [];
 
-const allFields = ref([
-  { name: "Order date", id: 5 },
-  { name: "First name", id: 6 },
-  { name: "Last name", id: 7 },
-]);
+const allFields = ref(
+  await useApi.getSheetHeaders().then(
+    headers => headers.map((header, index) => ({
+      name: header as Header,
+      id: index
+    }))
+  )
+)
+
 
 const sheet = ref({
   name: '',
   prodcuts: [],
-  fields: [{ name: "Order ID", id: 1, required: true }]
+  fields: [{ name: "Order ID" as OrderId, id: 1, required: true }]
 });
 
 function handleSubmit(e: Event) {
   e.preventDefault();
   // TODO: call callback sent from props
+  useApi.createSheet({
+    title: sheet.value.name,
+    headers: sheet.value.fields.map(field => field.name) as Headers
+  })
 }
 </script>
 
@@ -32,7 +42,7 @@ function handleSubmit(e: Event) {
             Sheet name
           </template>
           <template #input>
-          <Input id="sheet-name" v-model="sheet.name" placeholder="My orders" />
+            <Input id="sheet-name" v-model="sheet.name" placeholder="My orders" />
           </template>
         </InputGroup>
         <InputGroup>
@@ -40,12 +50,8 @@ function handleSubmit(e: Event) {
             Filter by products (optional)
           </template>
           <template #input>
-            <MultiselectDropdown
-              v-model="sheet.prodcuts"
-              :searchable="true"
-              :items="products"
-              label="Search products"
-            />
+            <MultiselectDropdown v-model="sheet.prodcuts" :searchable="true" :items="products"
+              label="Search products" />
           </template>
         </InputGroup>
         <InputGroup>
@@ -58,16 +64,12 @@ function handleSubmit(e: Event) {
                 <div class="list-title">
                   <p>Selected fields</p>
                 </div>
-                <draggable 
-                  v-model="sheet.fields" 
-                  group="fields"  
-                  item-key="id"
-                  class="list">
-                  <template #item="{element}">
+                <draggable v-model="sheet.fields" group="fields" item-key="id" class="list">
+                  <template #item="{ element }">
                     <div class="draggable-field selected" :class="{ disabled: element.required }">
                       <i class="i-youcan:dots-six-vertical"></i>
                       <div class="field-content">
-                        <span>{{element.name}}</span>
+                        <span>{{ element.name }}</span>
                         <span class="required" v-if="element.required">Required</span>
                       </div>
                     </div>
@@ -82,19 +84,15 @@ function handleSubmit(e: Event) {
                   <p>Available fields</p>
                 </div>
                 <div class="empty-state">
-                  <span v-if="allFields.length === 0 && sheet.fields.length > 1">No more fields</span> 
+                  <span v-if="allFields.length === 0 && sheet.fields.length > 1">No more fields</span>
                   <span v-else-if="allFields.length === 0">No fields available</span>
                 </div>
-                <draggable
-                  v-model="allFields" 
-                  group="fields"  
-                  item-key="id"
-                  class="list">
-                  <template #item="{element}">
+                <draggable v-model="allFields" group="fields" item-key="id" class="list">
+                  <template #item="{ element }">
                     <div class="draggable-field">
                       <i class="i-youcan:dots-six-vertical"></i>
                       <div class="field-content">
-                        {{element.name}}
+                        {{ element.name }}
                       </div>
                     </div>
                   </template>

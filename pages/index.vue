@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import "../assets/css/global.css"
 
-const getSetting = await useApi.getSetting()
-const setting = useSetting(getSetting?.value)
+const setting = useSetting(await useApi.getSetting())
 
 </script>
 
@@ -32,8 +31,5 @@ const setting = useSetting(getSetting?.value)
         <Sheets />
       </template>
     </Card>
-    <NuxtLink to="/sheet/3">
-      Single page
-    </NuxtLink>
   </div>
 </template>

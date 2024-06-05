@@ -7,14 +7,14 @@ export const columns: TableColumn[] = [
   { label: 'Status', accessor: 'status' },
 ];
 
-export const actions: TableActions [] = [
+export const actions: TableActions[] = [
   {
     label: 'Open',
     iconName: 'i-youcan:open-link',
     tooltip: 'Open',
     events: {
       click(row: any, index: number) {
-        // Do something
+        navigateTo(row.googleUrl, { external: true })
       },
     },
   },
@@ -24,7 +24,7 @@ export const actions: TableActions [] = [
     tooltip: 'Edit',
     events: {
       click(row: any, index: number) {
-        // Do something
+        navigateTo(`/sheet/${row.id}`)
       },
     },
   },
@@ -34,7 +34,8 @@ export const actions: TableActions [] = [
     tooltip: 'Delete',
     events: {
       click(row: any, index: number) {
-        // Do something
+        useApi.deleteSheet(row.id)
+        window.location.reload
       },
     },
   },
