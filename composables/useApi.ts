@@ -4,7 +4,8 @@ import type {
   ResBody,
   Headers,
   Sheet,
-  SheetUpdate
+  SheetUpdate,
+  SheetCreate
 } from "../utils/types";
 
 // default pagination Count
@@ -73,6 +74,13 @@ export default {
 
   deleteSheet: (id: string) => fetcher<boolean>(`/sheet/${id}`, {
     method: "DELETE"
+  }),
+
+
+
+  createSheet: (sheetCreate: SheetCreate) => fetcher<Sheet>(`/sheet`, {
+    method: "POST",
+    body: sheetCreate
   }),
 
 
