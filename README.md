@@ -66,9 +66,33 @@ both frontend and backend is decoupled
   - separated to microServices
   - attached and share something like:
     error state (useError, sendError)
-    acc to the below pic  
-  
+    acc to the below pic
+
+<pre>
+- Example:
+ 1- useApi.getSetting() #frontend => "/setting/" #serverRoute
+ 2- "/server/route/setting/index.get" #serverRoute => settingService.get() #service
+ 3- settingService.get() #service => /server/composables/settingRepository.get() #repository
+</pre>
+
 <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/19a79135-94fd-4e87-9bdd-834c27ab7223" width="400">
+
+## How Services Communicate?
+- Service Communicate to each others using `mediatorService` 
+  its an event => listener dynamic method dispatcher
+  instead of `Observer` Service (not easy to be tracked by developers)
+  example: once `googleService` `authClient()` failed it should till `SettingService` to `disconnect()` current OAuth2Client Credentials
+
+  - googleService
+    <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/c7bc5a83-8f6d-44a3-a8cb-26eb947aba89">
+  <br>
+  - mediatorService
+  <img src="https://github.com/abdallah-zaghloul/nuxt-google-sheet/assets/61375797/f63c98a2-4910-4b80-a82d-8f1ad5142988">
+
+## Embdedd Youcan APPs Developer Overview:
+<strong>
+<a href="https://drive.google.com/file/d/1lPlQgjeodre0IsjtWOWX2paQRkj9-7gk/view?usp=drive_link">Check This Link</a>
+</strong>
 
 ## Response Shape :
 same as nuxt response 
@@ -83,6 +107,8 @@ same as nuxt response
 ```
 available Status/Http codes:
 - 422: unprocessable entity (validation)
+- 401: unauthenticated
 - 404: not found
 - 200: success
 - 500: internal server (global error)
+
