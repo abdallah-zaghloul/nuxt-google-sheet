@@ -25,7 +25,7 @@
   to the parner Google Spread Sheets using its own OAuth2 Credentials
 
 ### MVP Demo
-[![MVP demo](https://img.youtube.com/vi/j6bQNpoOLts/0.jpg)](https://youtu.be/j6bQNpoOLts)
+[![MVP demo](https://img.youtube.com/vi/NDjlAHjKSDI/0.jpg)](https://youtu.be/NDjlAHjKSDI)
 
 ## Infra-structure
 
