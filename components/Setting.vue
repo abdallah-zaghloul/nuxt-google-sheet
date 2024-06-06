@@ -35,9 +35,8 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
           <template #input>
           <Input id="clientId" :model-value="setting?.clientId" :placeholder="'Google Client ID'" />
           </template>
-          <template v-if="hasError(v$, 'clientId')" #error>
-            <small>{{ errorMessage(v$, 'clientId') }}</small>
-          </template>
+         
+          
         </InputGroup>
         <InputGroup>
           <template #label>
@@ -46,9 +45,8 @@ const { v$, onSubmit, hasError, errorMessage } = useValidator({
           <template #input>
             <Input id="clientSecret" :model-value="setting?.clientSecret" :placeholder="'Google Client Secret'" />
           </template>
-          <template v-if="hasError(v$, 'clientSecret')" #error>
-            <small>{{ errorMessage(v$, 'clientSecret') }}</small>
-          </template>
+          
+          
         </InputGroup>
         <div class="footer">
           <PrimaryButton type="submit">
